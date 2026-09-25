@@ -12,6 +12,7 @@ namespace Logic.Authentication.DI
             services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IDefaultAdminSeeder, DefaultAdminSeeder>();
         }
     }
 }

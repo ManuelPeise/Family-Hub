@@ -11,4 +11,5 @@ namespace Logic.Shared.DI
             services.AddSingleton<IEmailSender, SmtpEmailSender>();
             services.AddSingleton<IEmailNotificationHandler, EmailNotificationHandler>();
         }
+    }
 }

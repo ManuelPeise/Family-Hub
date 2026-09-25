@@ -7,6 +7,8 @@ using Data.Accessor.DI;
 using Logic.Authentication;
 using Logic.Authentication.DI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Net.Http.Headers;
+using Web.Api.Service.Auth;
 using Web.Api.Service.OpenApi;
 using Logic.Shared.DI;
 
@@ -24,6 +26,7 @@ namespace Web.Api.Bundels
 
         internal static void AddAppServices(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddHttpContextAccessor();
             services.AddLoggingServices(configuration);
             services.AddDatabaseServices(configuration);
             services.AddOptionModels(configuration);
@@ -90,6 +93,20 @@ namespace Web.Api.Bundels
                         // Keep the claim names from the token ("sub", "email", "role") instead of mapping them to long URIs.
                         options.MapInboundClaims = false;
                         options.TokenValidationParameters = JwtTokenParameters.CreateValidationParameters(jwtOptions);
+
+                        // Browsers send the token in the HttpOnly cookie set by Login; an Authorization header still takes precedence.
+                        options.Events = new JwtBearerEvents
+                        {
+                            OnMessageReceived = context =>
+                            {
+                                if (!context.Request.Headers.ContainsKey(HeaderNames.Authorization))
+                                {
+                                    context.Token = context.Request.Cookies[AuthCookieNames.AccessToken];
+                                }
+
+                                return Task.CompletedTask;
+                            },
+                        };
                     });
         }
 

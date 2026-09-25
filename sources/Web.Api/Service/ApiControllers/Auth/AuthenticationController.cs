@@ -1,6 +1,7 @@
 ﻿using Logic.Shared.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Models.Auth;
+using Web.Api.Service.Auth;
 
 namespace Web.Api.Service.ApiControllers.Auth
 {
@@ -24,7 +25,7 @@ namespace Web.Api.Service.ApiControllers.Auth
 
             SetTokenCookies(response);
 
-            return Ok(response);
+            return Ok();
         }
 
         [HttpPost(Name = "Logout")]
@@ -38,19 +39,30 @@ namespace Web.Api.Service.ApiControllers.Auth
         [NonAction]
         private void SetTokenCookies(TokenResponse tokenResponse)
         {
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Expires = DateTime.UtcNow.AddDays(7)
-            };
-            Response.Cookies.Append("refreshToken", tokenResponse.RefreshToken, cookieOptions);
+            Response.Cookies.Append(AuthCookieNames.AccessToken, tokenResponse.JwtToken, CreateTokenCookieOptions(tokenResponse.JwtTokenExpiresAt));
+            Response.Cookies.Append(AuthCookieNames.RefreshToken, tokenResponse.RefreshToken, CreateTokenCookieOptions(tokenResponse.RefreshTokenExpiresAt));
         }
 
         [NonAction]
         private void ClearTokenCookies()
         {
-            Response.Cookies.Delete("accessToken");
-            Response.Cookies.Delete("refreshToken");
+            Response.Cookies.Delete(AuthCookieNames.AccessToken, CreateTokenCookieOptions());
+            Response.Cookies.Delete(AuthCookieNames.RefreshToken, CreateTokenCookieOptions());
+        }
+
+        /// <summary>
+        /// HttpOnly keeps the tokens away from JavaScript, SameSite=Strict keeps other sites from sending them (CSRF).
+        /// </summary>
+        [NonAction]
+        private CookieOptions CreateTokenCookieOptions(DateTime? expiresAt = null)
+        {
+            return new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = Request.IsHttps,
+                SameSite = SameSiteMode.Strict,
+                Expires = expiresAt,
+            };
         }
     }
 }

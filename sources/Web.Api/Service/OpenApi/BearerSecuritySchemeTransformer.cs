@@ -19,7 +19,7 @@ namespace Web.Api.Service.OpenApi
                 Type = SecuritySchemeType.Http,
                 Scheme = "bearer",
                 BearerFormat = "JWT",
-                Description = "Access token (jwtToken) from POST /api/Authentication/Login, without the \"Bearer \" prefix.",
+                Description = "Not needed in the browser: POST /api/Authentication/Login sets the HttpOnly accessToken cookie, which is sent automatically. Use this only to send a token manually (without the \"Bearer \" prefix).",
             };
 
             return Task.CompletedTask;
