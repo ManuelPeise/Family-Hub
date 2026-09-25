@@ -1,0 +1,50 @@
+name: studyhub
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: studyhub-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: RootPassword123!
+      MYSQL_DATABASE: StudyHubContextDb
+      MYSQL_USER: DevUser
+      MYSQL_PASSWORD: DevPassword123!
+      TZ: Europe/Berlin
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pRootPassword123!"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: studyhub-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP (matches Email:Port)
+      - "8025:8025"   # Web UI -> http://localhost:8025
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+      MP_MAX_MESSAGES: 5000
+
+  seq:
+    image: datalust/seq:latest
+    container_name: studyhub-seq
+    restart: unless-stopped
+    ports:
+      - "5341:80"     # UI + ingestion (matches Seq:ServerUrl) -> http://localhost:5341
+    environment:
+      ACCEPT_EULA: Y
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
+    volumes:
+      - seq-data:/data
+
+volumes:
+  mysql-data:
+  seq-data:
