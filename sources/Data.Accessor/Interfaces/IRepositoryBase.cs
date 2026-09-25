@@ -1,4 +1,4 @@
-﻿using Data.Database.Entities;
+﻿using Data.Database;
 using System.Linq.Expressions;
 
 namespace Data.Accessor.Interfaces
