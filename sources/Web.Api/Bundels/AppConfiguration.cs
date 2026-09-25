@@ -1,4 +1,6 @@
-﻿namespace Web.Api.Bundels
+﻿using Serilog;
+
+namespace Web.Api.Bundels
 {
     internal static class AppConfiguration
     {
@@ -6,28 +8,20 @@
         {
             await app.EnsureDatabaseUpToDate();
 
+            app.UseSerilogRequestLogging();
+
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
             }
 
-            app.ConfigureCors();
+            app.UseCors();
 
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
             app.MapControllers();
-        }
-
-        private static void ConfigureCors(this WebApplication app)
-        {
-            app.UseCors(builder =>
-            {
-                builder.AllowAnyOrigin()
-                       .AllowAnyMethod()
-                       .AllowAnyHeader();
-            });
         }
     }
 }

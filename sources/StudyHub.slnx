@@ -2,7 +2,9 @@
   <Folder Name="/1 Web/">
     <Project Path="Web.Api/Web.Api.csproj" Id="0b25566a-e39f-469f-9c62-fab077463e9a" />
   </Folder>
-  <Folder Name="/2 Logic/" />
+  <Folder Name="/2 Logic/">
+    <Project Path="Logic.Shared/Logic.Shared.csproj" />
+  </Folder>
   <Folder Name="/3 Data/">
     <Project Path="Data.Accessor/Data.Accessor.csproj" Id="97ba7bed-a89c-4b1e-88f6-ef759baf1f07" />
     <Project Path="Data.Database/Data.Database.csproj" Id="1ebf16df-a182-4334-aea2-b46bf6c4d49e" />

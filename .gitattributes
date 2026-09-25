@@ -1,0 +1,21 @@
+# Store all text files with LF in the repository.
+# The working copy gets the platform's native line endings (CRLF on Windows).
+* text=auto
+
+# Windows batch files must be CRLF in the working copy on every platform
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Shell scripts must be LF in the working copy on every platform
+*.sh text eol=lf
+
+# Binary files: no line-ending conversion, no text diff
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.dll binary
+*.exe binary
