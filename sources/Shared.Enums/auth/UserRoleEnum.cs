@@ -1,9 +1,8 @@
-﻿namespace Shared.Enums.auth
+﻿namespace Shared.Enums.Auth
 {
     public enum UserRoleEnum
     {
         Admin = 0,
-        Parent = 1,
-        Student = 2
+        User = 1
     }
 }

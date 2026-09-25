@@ -3,7 +3,7 @@ using Logic.Shared.Interfaces;
 
 namespace Logic.Shared
 {
-    public class BCryptPasswordHasher : IPasswordHasher
+    public class PasswordHasher : IPasswordHasher
     {
         private const int WorkFactor = 12;
 
@@ -27,6 +27,15 @@ namespace Logic.Shared
         public bool NeedsRehash(string passwordHash)
         {
             return BCrypt.Net.BCrypt.PasswordNeedsRehash(passwordHash, WorkFactor);
+        }
+
+        public string GetRandomOneTimePassword(int length = 12)
+        {
+            const string validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+-=[]{}|;:,.<>?";
+            var random = new Random();
+            
+            return new string(Enumerable.Repeat(validChars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }

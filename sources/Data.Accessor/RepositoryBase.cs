@@ -1,21 +1,28 @@
 ﻿using Data.Accessor.Interfaces;
 using Data.Database;
-using Data.Database.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace Data.Accessor
 {
-    public class RepositoryBase<TEntity> : IRepositoryBase<TEntity> where TEntity : AEntityBase
+    public class RepositoryBase<TEntity> : IRepositoryBase<TEntity>  where TEntity : AEntityBase
     {
-        private readonly DatabaseContext _context;
+        private readonly DbContext _context;
 
-        public RepositoryBase(DatabaseContext context)
+        private readonly DbSet<TEntity> DbSet;
+
+        public RepositoryBase(DbContext context)
         {
-            _context = context;
+           _context = context;
+           DbSet = _context.Set<TEntity>();
         }
 
-        protected DbSet<TEntity> DbSet => _context.Set<TEntity>();
+        public IQueryable<TEntity> Query(bool asNoTracking = false)
+        {
+            return asNoTracking
+                ? DbSet.AsNoTracking()
+                : DbSet;
+        }
 
         public async Task<TEntity?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
         {
@@ -89,16 +96,6 @@ namespace Data.Accessor
             return true;
         }
 
-        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-        {
-            return await _context.SaveChangesAsync(cancellationToken);
-        }
-
-        protected IQueryable<TEntity> Query(bool asNoTracking = false)
-        {
-            return asNoTracking
-                ? DbSet.AsNoTracking()
-                : DbSet;
-        }
+       
     }
 }

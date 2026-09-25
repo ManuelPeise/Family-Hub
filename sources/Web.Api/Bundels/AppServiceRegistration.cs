@@ -1,33 +1,55 @@
-﻿using Data.Accessor;
-using Data.Accessor.Interfaces;
-using Data.Database;
-using Logic.Shared;
-using Logic.Shared.Interfaces;
+﻿using Data.Database.Identity;
+using Data.Database.StudyHub;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Shared.Models.Options;
+using Data.Accessor.DI;
+using Logic.Authentication;
+using Logic.Authentication.DI;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Web.Api.Service.OpenApi;
+using Logic.Shared.DI;
 
 namespace Web.Api.Bundels
 {
     internal static class AppServiceRegistration
     {
-        private const string ConnectionStringName = "StudyHubContext";
         private const string JwtOptionsSectionName = "Jwt";
         private const string EmailOptionsSectionName = "Email";
         private const string SeqOptionsSectionName = "Seq";
         private const string AdminOptionsSectionName = "Admin";
+
+        internal const string OpenApiDocumentName = "v1";
+        internal const string OpenApiDocumentTitle = "StudyHub API";
 
         internal static void AddAppServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddLoggingServices(configuration);
             services.AddDatabaseServices(configuration);
             services.AddOptionModels(configuration);
-            services.AddLogicServices();
+            services.AddJwtAuthentication(configuration);
+            services.AddDataAccessorServices();
+            services.AddAuthenticationServices();
+            services.AddSharedServices();
 
             services.AddCorsServices();
 
             services.AddControllers();
-            services.AddOpenApi();
+            services.AddOpenApiServices();
+        }
+
+        private static void AddOpenApiServices(this IServiceCollection services)
+        {
+            services.AddOpenApi(OpenApiDocumentName, options =>
+            {
+                options.AddDocumentTransformer((document, context, cancellationToken) =>
+                {
+                    document.Info.Title = OpenApiDocumentTitle;
+                    return Task.CompletedTask;
+                });
+                options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+                options.AddOperationTransformer<BearerSecurityRequirementTransformer>();
+            });
         }
 
         private static void AddLoggingServices(this IServiceCollection services, IConfiguration configuration)
@@ -47,16 +69,28 @@ namespace Web.Api.Bundels
 
         private static void AddDatabaseServices(this IServiceCollection services, IConfiguration configuration)
         {
-            var connectionString = configuration.GetConnectionString(ConnectionStringName)
-                ?? throw new InvalidOperationException($"Connection string '{ConnectionStringName}' not found.");
+            var identityConnectionString = configuration.GetConnectionString(IdentityDbContext.ConnectionStringName)
+                ?? throw new InvalidOperationException($"Connection string '{IdentityDbContext.ConnectionStringName}' not found.");
 
-            services.AddDbContext<DatabaseContext>(options => options.UseMySQL(connectionString));
-            services.AddScoped(typeof(IRepositoryBase<>), typeof(RepositoryBase<>));
+            var studyHubConnectionString = configuration.GetConnectionString(StudyHubDbContext.ConnectionStringName)
+                ?? throw new InvalidOperationException($"Connection string '{StudyHubDbContext.ConnectionStringName}' not found.");
+
+            services.AddDbContext<IdentityDbContext>(options => options.UseMySQL(identityConnectionString));
+            services.AddDbContext<StudyHubDbContext>(options => options.UseMySQL(studyHubConnectionString));
         }
 
-        private static void AddLogicServices(this IServiceCollection services)
+        private static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
+            var jwtOptions = configuration.GetSection(JwtOptionsSectionName).Get<JwtOptions>()
+                ?? throw new InvalidOperationException($"Configuration section '{JwtOptionsSectionName}' not found.");
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddJwtBearer(options =>
+                    {
+                        // Keep the claim names from the token ("sub", "email", "role") instead of mapping them to long URIs.
+                        options.MapInboundClaims = false;
+                        options.TokenValidationParameters = JwtTokenParameters.CreateValidationParameters(jwtOptions);
+                    });
         }
 
         private static void AddCorsServices(this IServiceCollection services)

@@ -109,7 +109,7 @@ Follow these rules when writing or changing code in `sources/`. If existing code
 
 ## Data
 
-- There is a single `DatabaseContext` in `Data.Database`.
+- All DbContexts live in `Data.Database`. The API uses one context. Web.IdentityServer uses `IdentityServerDbContext`, `IdentityServerConfigurationDbContext` and `PersistedGrantDbContext`, each with its own migrations folder under `IdentityServer/Migrations/` and its own history table (`IdentityServerMigrationsHistory`). Pass `--context` and `-o` for those (see CLAUDE.md).
 - Change the schema only through EF Core migrations:
   ```sh
   dotnet ef migrations add <Name> --project Data.Database --startup-project Web.Api

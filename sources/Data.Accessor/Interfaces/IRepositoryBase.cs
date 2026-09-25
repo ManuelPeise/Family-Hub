@@ -5,6 +5,8 @@ namespace Data.Accessor.Interfaces
 {
     public interface IRepositoryBase<TEntity> where TEntity : AEntityBase
     {
+        IQueryable<TEntity> Query(bool asNoTracking = false);
+
         Task<TEntity?> GetByIdAsync(long id, CancellationToken cancellationToken = default);
 
         Task<List<TEntity>> GetAllAsync(bool asNoTracking = false, CancellationToken cancellationToken = default);
@@ -28,7 +30,5 @@ namespace Data.Accessor.Interfaces
         void DeleteRange(IEnumerable<TEntity> entities);
 
         Task<bool> DeleteByIdAsync(long id, CancellationToken cancellationToken = default);
-
-        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }
