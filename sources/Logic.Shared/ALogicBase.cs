@@ -1,5 +1,6 @@
 ﻿using Logic.Shared.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace Logic.Shared
 {
@@ -24,9 +25,9 @@ namespace Logic.Shared
                throw new UnauthorizedAccessException("User is not authenticated.");
             }
             
-            var userIdClaimValue = user.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
-            var emailClaimValue = user.Claims.FirstOrDefault(c => c.Type == "Email")?.Value;
-
+            // TokenService writes "sub" and "email", and JwtBearer keeps those names (MapInboundClaims = false).
+            var userIdClaimValue = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            var emailClaimValue = user.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
 
             if (string.IsNullOrEmpty(userIdClaimValue) || string.IsNullOrEmpty(emailClaimValue))
             {

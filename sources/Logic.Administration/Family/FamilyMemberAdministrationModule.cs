@@ -4,7 +4,9 @@ using Data.Database.Context.Entities.User;
 using Logic.Shared.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using MySql.Data.MySqlClient;
 using Shared.Enums.Auth;
+using Shared.Enums.Family;
 using Shared.Enums.Notifications;
 using Shared.Models.Family;
 
@@ -22,10 +24,11 @@ namespace Logic.Administration.Family
             _applicationUnitOfWork = applicationUnitOfWork;
         }
 
-        public async Task InsertFamilyRequest(FamilyMemberRequest request)
+        public async Task<FamilyAccessRequestResultEnum> InsertFamilyRequest(FamilyMemberRequest request)
         {
             try
             {
+                // The controller validates the request ([Required] on FamilyMemberRequest); these guard other callers.
                 ArgumentException.ThrowIfNullOrEmpty(request.FamilyName, nameof(request.FamilyName));
                 ArgumentException.ThrowIfNullOrEmpty(request.ContactMailAddress, nameof(request.ContactMailAddress));
                 ArgumentException.ThrowIfNullOrEmpty(request.MainMemberFirstName, nameof(request.MainMemberFirstName));
@@ -35,12 +38,17 @@ namespace Logic.Administration.Family
                 var isExistingRequest = _applicationUnitOfWork.AdministrationUnitOfWork.FamilyAccessRequestRepository.Query()
                     .Any(x => x.FamilyName == request.FamilyName && x.ContactMailAddress == request.ContactMailAddress);
 
+                if (isExistingRequest)
+                {
+                    return FamilyAccessRequestResultEnum.AlreadyRequested;
+                }
+
                 var isExistingUserMail = _applicationUnitOfWork.IdentityUnitOfWork.UserRepository.Query()
                     .Any(x => x.Email == request.ContactMailAddress);
 
-                if (isExistingRequest || isExistingUserMail)
+                if (isExistingUserMail)
                 {
-                    throw new InvalidOperationException("A family request with the same family name and contact mail address or a user with the same email already exists.");
+                    return FamilyAccessRequestResultEnum.EmailInUse;
                 }
 
                 var familyRequest = new FamilyAccessRequestEntity
@@ -78,6 +86,15 @@ namespace Logic.Administration.Family
                 }
 
                 await _applicationUnitOfWork.SaveChanges();
+
+                return FamilyAccessRequestResultEnum.Created;
+            }
+            catch (DbUpdateException exception) when (exception.InnerException is MySqlException { Number: (int)MySqlErrorCode.DuplicateKeyEntry })
+            {
+                // An identical request was saved between the check above and this insert; the unique index rejected ours.
+                _logger.LogInformation("Family request for {FamilyName} was already stored by a concurrent request", request.FamilyName);
+
+                return FamilyAccessRequestResultEnum.AlreadyRequested;
             }
             catch (Exception exception)
             {

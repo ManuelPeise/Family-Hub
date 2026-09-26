@@ -10,7 +10,8 @@ namespace Logic.Shared.DI
             services.AddSingleton<IPasswordHasher, PasswordHasher>();
             services.AddSingleton<IEmailSender, SmtpEmailSender>();
             services.AddSingleton<IEmailNotificationHandler, EmailNotificationHandler>();
-            services.AddSingleton<IUserNotificationService, UserNotificationService>();
+            // Scoped: it uses the scoped unit of work (DbContext) and reads the current request's user.
+            services.AddScoped<IUserNotificationService, UserNotificationService>();
         }
     }
 }
