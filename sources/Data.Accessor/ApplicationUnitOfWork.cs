@@ -12,10 +12,13 @@ namespace Data.Accessor
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IIdentityUnitOfWork _identityUnitOfWork;
         private readonly IFamilyUnitOfWork _familyUnitOfWork;
+        private readonly IAdministrationUnitOfWork _administrationUnitOfWork;
         private readonly FamilyHubDbContext _familyHubDbContext;
 
         public IIdentityUnitOfWork IdentityUnitOfWork => _identityUnitOfWork;
         public IFamilyUnitOfWork FamilyUnitOfWork => _familyUnitOfWork;
+        public IAdministrationUnitOfWork AdministrationUnitOfWork => _administrationUnitOfWork;
+
 
         public ApplicationUnitOfWork(
             IHttpContextAccessor httpContextAccessor,
@@ -26,6 +29,7 @@ namespace Data.Accessor
             _familyHubDbContext = familyHubDbContext;
             _identityUnitOfWork = new IdentityUnitOfWork(identityDbContext);
             _familyUnitOfWork = new FamilyUnitOfWork(familyHubDbContext);
+            _administrationUnitOfWork = new AdministrationUnitOfWork(familyHubDbContext);
         }
 
         public Task SaveChanges()

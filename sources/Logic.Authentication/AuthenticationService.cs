@@ -1,5 +1,4 @@
 ﻿using Data.Accessor.Interfaces;
-using Data.Database.Context.Entities;
 using Data.Database.Context.Entities.User;
 using Logic.Authentication.Interfaces;
 using Logic.Shared.Interfaces;
@@ -112,53 +111,6 @@ namespace Logic.Authentication
             {
                 _logger.LogError(exception, "Error occurred while refreshing token.");
                 return null;
-            }
-        }
-
-        public async Task<bool> RegisterUser(RegistrationRequest request)
-        {
-            try
-            {
-                ArgumentException.ThrowIfNullOrEmpty(request.UserName, nameof(request.UserName));
-
-                var identityUnitOfWork = _applicationUnitOfWork.IdentityUnitOfWork;
-
-                var existingUser = identityUnitOfWork.UserRepository.Query()
-                    .FirstOrDefault(u => u.UserName == request.UserName || u.Email == request.UserName);
-                
-                if (existingUser != null)
-                {
-                    return false;
-                }
-
-                var onetimePassword = _passwordHasher.GetRandomOneTimePassword();
-
-                var newUserEntity = new UserEntity
-                {
-                    FirstName = request.FirstName,
-                    LastName = request.LastName,
-                    UserName = request.UserName,
-                    Email = request.Email,
-                    Credentials = new UserCredentialsEntity
-                    {
-                        PasswordHash = _passwordHasher.HashPassword(onetimePassword),
-                        CreatedBy = request.UserName,
-                    },
-                };
-
-                await identityUnitOfWork.UserRepository.AddAsync(newUserEntity, CancellationToken.None);
-
-                await _applicationUnitOfWork.SaveChanges();
-
-                await _emailNotificationHandler.SendRegistrationSuccessNotification(request.Email, onetimePassword);
-                
-                return true;
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError(exception, "Error occurred while registering user.");
-
-                return false;
             }
         }
 

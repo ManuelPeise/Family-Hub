@@ -10,6 +10,7 @@ namespace Logic.Shared.DI
             services.AddSingleton<IPasswordHasher, PasswordHasher>();
             services.AddSingleton<IEmailSender, SmtpEmailSender>();
             services.AddSingleton<IEmailNotificationHandler, EmailNotificationHandler>();
+            services.AddSingleton<IUserNotificationService, UserNotificationService>();
         }
     }
 }

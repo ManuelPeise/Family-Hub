@@ -12,6 +12,7 @@ namespace Web.Api.Service.Attributes
     /// <list type="bullet">
     /// <item><c>[ApiAuthentication]</c>: any signed-in user.</item>
     /// <item><c>[ApiAuthentication(UserRoleEnum.User)]</c>: one of the roles.</item>
+    /// <item><c>[ApiAuthentication(roles: AuthenticationRoleParameters.AllUserRoles)]</c>: one of the roles in a named role set.</item>
     /// <item><c>[ApiAuthentication(ScopeTypeEnum.Administration, ScopePermissionEnum.View | ScopePermissionEnum.Edit)]</c>: all listed permissions in the scope.</item>
     /// </list>
     /// Admin always passes. Stack the attribute to require several scopes.
@@ -27,8 +28,29 @@ namespace Web.Api.Service.Attributes
 
             if (roles.Length > 0)
             {
-                Roles = string.Join(",", roles.Append(UserRoleEnum.Admin).Distinct());
+                SetRoles(roles);
             }
+        }
+
+        /// <summary>
+        /// Takes a comma-separated role set from <c>AuthenticationRoleParameters</c>. Every name must be a <see cref="UserRoleEnum"/> value.
+        /// </summary>
+        public ApiAuthenticationAttribute(string roles)
+        {
+            AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme;
+
+            var parsedRoles = roles.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                                   .Select(role => Enum.TryParse<UserRoleEnum>(role, ignoreCase: false, out var parsedRole) && Enum.IsDefined(parsedRole)
+                                       ? parsedRole
+                                       : throw new ArgumentException($"'{role}' is not a {nameof(UserRoleEnum)} value.", nameof(roles)))
+                                   .ToList();
+
+            if (parsedRoles.Count == 0)
+            {
+                throw new ArgumentException("At least one role is required.", nameof(roles));
+            }
+
+            SetRoles(parsedRoles);
         }
 
         public ApiAuthenticationAttribute(ScopeTypeEnum scope, ScopePermissionEnum permissions)
@@ -41,6 +63,12 @@ namespace Web.Api.Service.Attributes
             AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme;
             Scope = scope;
             ScopePermissions = permissions;
+        }
+
+        // Admin always passes, so it is added to every role set.
+        private void SetRoles(IEnumerable<UserRoleEnum> roles)
+        {
+            Roles = string.Join(",", roles.Append(UserRoleEnum.Admin).Distinct());
         }
 
         public IEnumerable<IAuthorizationRequirement> GetRequirements()
