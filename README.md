@@ -1,4 +1,4 @@
-# Study-Hub
+# Family-Hub
 
 ## Local infrastructure
 
@@ -22,4 +22,4 @@ docker compose -f docker/docker-compose.yml down -v # stop and wipe the database
 
 - Mailpit web UI: http://localhost:8025
 - Seq log UI: http://localhost:5341 (no login in development)
-- Database: `StudyHubContextDb`, user `DevUser` / `DevPassword123!` (development only)
+- Database: `FamilyHubContextDb`, user `DevUser` / `DevPassword123!` (development only)

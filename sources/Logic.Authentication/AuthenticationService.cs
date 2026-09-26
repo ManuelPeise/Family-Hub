@@ -1,5 +1,6 @@
 ﻿using Data.Accessor.Interfaces;
 using Data.Database.Context.Entities;
+using Data.Database.Context.Entities.User;
 using Logic.Authentication.Interfaces;
 using Logic.Shared.Interfaces;
 using Microsoft.EntityFrameworkCore;

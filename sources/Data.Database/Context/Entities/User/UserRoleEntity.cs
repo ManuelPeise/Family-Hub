@@ -1,6 +1,6 @@
 ﻿using Shared.Enums.Auth;
 
-namespace Data.Database.Context.Entities
+namespace Data.Database.Context.Entities.User
 {
     public class UserRoleEntity: AEntityBase
     {

@@ -1,13 +1,13 @@
-name: studyhub
+name: familyhub
 
 services:
   mysql:
     image: mysql:8.4
-    container_name: studyhub-mysql
+    container_name: familyhub-mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: RootPassword123!
-      MYSQL_DATABASE: StudyHubContextDb
+      MYSQL_DATABASE: FamilyHubContextDb
       MYSQL_USER: DevUser
       MYSQL_PASSWORD: DevPassword123!
       TZ: Europe/Berlin
@@ -24,7 +24,7 @@ services:
 
   mailpit:
     image: axllent/mailpit:latest
-    container_name: studyhub-mailpit
+    container_name: familyhub-mailpit
     restart: unless-stopped
     ports:
       - "1025:1025"   # SMTP (matches Email:Port)
@@ -36,7 +36,7 @@ services:
 
   seq:
     image: datalust/seq:latest
-    container_name: studyhub-seq
+    container_name: familyhub-seq
     restart: unless-stopped
     ports:
       - "5341:80"     # UI + ingestion (matches Seq:ServerUrl) -> http://localhost:5341

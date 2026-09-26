@@ -11,27 +11,30 @@ namespace Data.Accessor
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IIdentityUnitOfWork _identityUnitOfWork;
-        private readonly StudyHubDbContext _studyHubDbContext;
+        private readonly IFamilyUnitOfWork _familyUnitOfWork;
+        private readonly FamilyHubDbContext _familyHubDbContext;
 
         public IIdentityUnitOfWork IdentityUnitOfWork => _identityUnitOfWork;
-        
+        public IFamilyUnitOfWork FamilyUnitOfWork => _familyUnitOfWork;
+
         public ApplicationUnitOfWork(
             IHttpContextAccessor httpContextAccessor,
-            StudyHubDbContext identityDbContext, 
-            StudyHubDbContext studyHubDbContext)
+            FamilyHubDbContext identityDbContext, 
+            FamilyHubDbContext familyHubDbContext)
         {
             _httpContextAccessor = httpContextAccessor;
-            _studyHubDbContext = studyHubDbContext;
+            _familyHubDbContext = familyHubDbContext;
             _identityUnitOfWork = new IdentityUnitOfWork(identityDbContext);
+            _familyUnitOfWork = new FamilyUnitOfWork(familyHubDbContext);
         }
 
         public Task SaveChanges()
         {
             StampAuditFields();
 
-            var studyHubRows = _studyHubDbContext.SaveChangesAsync();
+            var familyHubRows = _familyHubDbContext.SaveChangesAsync();
 
-            return Task.WhenAll(studyHubRows);
+            return Task.WhenAll(familyHubRows);
         }
 
         private void StampAuditFields()
@@ -39,7 +42,7 @@ namespace Data.Accessor
             var currentUser = GetCurrentUser();
             var now = DateTime.UtcNow;
 
-            foreach (var entry in _studyHubDbContext.ChangeTracker.Entries<AEntityBase>())
+            foreach (var entry in _familyHubDbContext.ChangeTracker.Entries<AEntityBase>())
             {
                 if (entry.State == EntityState.Added)
                 {

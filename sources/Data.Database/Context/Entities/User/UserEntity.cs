@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Data.Database.Context.Entities
+namespace Data.Database.Context.Entities.User
 {
     public class UserEntity: AEntityBase
     {

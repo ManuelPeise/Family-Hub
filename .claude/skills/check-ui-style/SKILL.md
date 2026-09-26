@@ -1,12 +1,12 @@
 ---
 name: check-ui-style
-description: Check StudyHub frontend UI code against the ui-styling skill and make sure the layout is responsive and mobile first, then fix what breaks the rules. Use when asked to check, review or verify UI style, styling or responsiveness in sources/Web.App, and after finishing a UI change there.
+description: Check FamilyHub frontend UI code against the ui-styling skill and make sure the layout is responsive and mobile first, then fix what breaks the rules. Use when asked to check, review or verify UI style, styling or responsiveness in sources/Web.App, and after finishing a UI change there.
 argument-hint: "[files or folders] [report]"
 ---
 
 # Check UI style
 
-Check UI code in `sources/Web.App` against the StudyHub styling rules and the mobile-first rules below, then fix what you find.
+Check UI code in `sources/Web.App` against the FamilyHub styling rules and the mobile-first rules below, then fix what you find.
 
 ## Arguments
 

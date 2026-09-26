@@ -1,4 +1,4 @@
-﻿using Data.Database.Context.Entities;
+﻿using Data.Database.Context.Entities.User;
 using Shared.Models.Auth;
 
 namespace Logic.Authentication.Interfaces

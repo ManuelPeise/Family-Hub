@@ -2,7 +2,7 @@ import { ApiError } from "src/lib/api/types/ApiError";
 import type { ApiRequestOptions } from "src/lib/api/types/ApiRequestOptions";
 
 /*
- * Small fetch wrapper for the StudyHub API. Authentication is carried by HttpOnly cookies
+ * Small fetch wrapper for the FamilyHub API. Authentication is carried by HttpOnly cookies
  * that the browser sends itself; this module never sees a token.
  */
 

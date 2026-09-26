@@ -1,7 +1,7 @@
 ﻿namespace Shared.Models.Options
 {
     /// <summary>
-    /// The StudyHub web client that is seeded into the IdentityServer configuration store on first start.
+    /// The FamilyHub web client that is seeded into the IdentityServer configuration store on first start.
     /// </summary>
     public class WebClientOptions
     {

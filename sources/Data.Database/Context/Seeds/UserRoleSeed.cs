@@ -1,4 +1,4 @@
-﻿using Data.Database.Context.Entities;
+﻿using Data.Database.Context.Entities.User;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Shared.Enums.Auth;
@@ -13,8 +13,8 @@ namespace Data.Database.Context.Seeds
 
             var entities = new List<UserRoleEntity>
             {
-                new UserRoleEntity { Id = 1, RoleName = "Admin",  RoleType = UserRoleEnum.Admin, CreatedAt = timeStamp, CreatedBy = ADbContextBase.SystemUser},
-                new UserRoleEntity { Id = 2, RoleName = "User", RoleType = UserRoleEnum.User, CreatedAt = timeStamp,CreatedBy = ADbContextBase.SystemUser },
+                new UserRoleEntity { Id = 1, RoleName = "Admin",  RoleType = UserRoleEnum.Admin, CreatedAt = timeStamp, CreatedBy = "System"},
+                new UserRoleEntity { Id = 2, RoleName = "User", RoleType = UserRoleEnum.User, CreatedAt = timeStamp,CreatedBy = "System" },
             };
 
             builder.HasData(entities);

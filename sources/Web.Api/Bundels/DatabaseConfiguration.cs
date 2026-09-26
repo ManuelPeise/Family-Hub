@@ -9,13 +9,13 @@ namespace Web.Api.Bundels
         internal static async Task EnsureDatabasesUpToDate(this WebApplication app)
         {
             using var scope = app.Services.CreateScope();
-            var studyHubDbContext = scope.ServiceProvider.GetRequiredService<StudyHubDbContext>();
+            var familyHubDbContext = scope.ServiceProvider.GetRequiredService<FamilyHubDbContext>();
 
-            var pendingMigrationsStudyHub = await studyHubDbContext.Database.GetPendingMigrationsAsync();
+            var pendingMigrationsFamilyHub = await familyHubDbContext.Database.GetPendingMigrationsAsync();
 
-            if (pendingMigrationsStudyHub.Any())
+            if (pendingMigrationsFamilyHub.Any())
             {
-                await studyHubDbContext.Database.MigrateAsync();
+                await familyHubDbContext.Database.MigrateAsync();
             }
         }
 

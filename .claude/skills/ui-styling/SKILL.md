@@ -1,16 +1,16 @@
 ---
 name: ui-styling
-description: StudyHub UI styling rules for the React frontend (Material UI components, theme, sx vs styled, colors, spacing, responsive layout, icons, dark mode). Use before creating or changing any component, page, layout, theme or CSS in sources/Web.App.
+description: FamilyHub UI styling rules for the React frontend (Material UI components, theme, sx vs styled, colors, spacing, responsive layout, icons, dark mode). Use before creating or changing any component, page, layout, theme or CSS in sources/Web.App.
 ---
 
-# StudyHub UI styling
+# FamilyHub UI styling
 
 Follow these rules when building or changing UI in `sources/Web.App`. The app uses Material UI (`@mui/material`, `@mui/icons-material`) with Emotion. If existing code breaks a rule, match the rule, not the exception.
 
 ## Custom components wrap MUI
 
 - App code never imports `@mui/material` or `@mui/icons-material`. It uses the custom components in `src/components/`, which wrap MUI. Only `src/components/` and the theme (`src/lib/theme/`) import MUI.
-- If the app needs a component that doesn't exist in `src/components/` yet, create the wrapper there first, then use it. The wrapper sets StudyHub defaults, is mobile first, and exposes only the props the app needs.
+- If the app needs a component that doesn't exist in `src/components/` yet, create the wrapper there first, then use it. The wrapper sets FamilyHub defaults, is mobile first, and exposes only the props the app needs.
 - The rules below apply to the wrappers in `src/components/` and to how app code uses them (for example, `sx` on a custom component).
 
 ## Components first

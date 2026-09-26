@@ -33,7 +33,7 @@ Never claim a check passed or that behavior works unless it was actually run or 
 
 ## Overview
 
-`Web.App` is the StudyHub frontend: a React 19 + TypeScript single-page app built with Vite. It is part of the `1 Web` layer and is listed in `../StudyHub.slnx` through `Web.App.esproj`, which runs `npm run dev` as its startup command. The .NET build does not build it (`ShouldRunBuildScript` is false).
+`Web.App` is the FamilyHub frontend: a React 19 + TypeScript single-page app built with Vite. It is part of the `1 Web` layer and is listed in `../FamilyHub.slnx` through `Web.App.esproj`, which runs `npm run dev` as its startup command. The .NET build does not build it (`ShouldRunBuildScript` is false).
 
 The app is at an early stage. `src/main.tsx` renders `AppStart` (`src/lib/appStart/AppStart.tsx`), which is still a placeholder.
 
@@ -148,7 +148,7 @@ There are no tests yet. The esproj names Vitest as the test framework, but Vites
 ### UI components
 
 - **App code never imports Material UI directly.** Only `src/components/` and `src/lib/theme/` import from `@mui/material` or `@mui/icons-material`. Features, pages and hooks use the custom components from `src/components/`. This is a deliberate boundary; don't bypass it because a direct import looks simpler.
-- If a needed component doesn't exist, create or extend a wrapper in `src/components/` first: wrap the MUI component (`Box`, `Stack`, `Grid`, `Typography`, `Button`, `TextField`, `Dialog`, `Drawer`, `Alert`, `Table`, ...), apply the StudyHub defaults, expose only the props the app needs, and follow `ui-styling`. A wrapper narrows and standardizes MUI; it doesn't rebuild what MUI already provides.
+- If a needed component doesn't exist, create or extend a wrapper in `src/components/` first: wrap the MUI component (`Box`, `Stack`, `Grid`, `Typography`, `Button`, `TextField`, `Dialog`, `Drawer`, `Alert`, `Table`, ...), apply the FamilyHub defaults, expose only the props the app needs, and follow `ui-styling`. A wrapper narrows and standardizes MUI; it doesn't rebuild what MUI already provides.
 - Put each wrapper in the folder for its kind:
   - `src/components/layout/`: layout components that arrange content (`Stack`, `AppShell`, `AuthLayout`, ...) and all general-purpose wrappers that are not form controls (`Typography`, `Button`, `Link`, `Alert`, ...).
   - `src/components/form/`: form components that take user input (`TextField`, `Select`, `Checkbox`, `Switch`, ...) and the form itself.

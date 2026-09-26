@@ -1,5 +1,5 @@
 ﻿using Data.Database.Configurations;
-using Data.Database.Context.Entities;
+using Data.Database.Context.Entities.User;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

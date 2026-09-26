@@ -3,6 +3,7 @@
     public interface IApplicationUnitOfWork
     {
         IIdentityUnitOfWork IdentityUnitOfWork { get; }
+        IFamilyUnitOfWork FamilyUnitOfWork { get; }
         Task SaveChanges();
     }
 }

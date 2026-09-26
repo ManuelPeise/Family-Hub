@@ -1,12 +1,12 @@
 ﻿using Data.Accessor.Interfaces;
 using Data.Database.Context;
-using Data.Database.Context.Entities;
+using Data.Database.Context.Entities.User;
 
 namespace Data.Accessor
 {
     public class IdentityUnitOfWork: IIdentityUnitOfWork
     {
-        private readonly StudyHubDbContext _identityDbContext;
+        private readonly FamilyHubDbContext _identityDbContext;
 
         private readonly IRepositoryBase<UserEntity> _userRepository;
         private readonly IRepositoryBase<UserCredentialsEntity> _credentialsRepository;
@@ -20,7 +20,7 @@ namespace Data.Accessor
         public IRepositoryBase<UserRefreshTokenEntity> RefreshTokenRepository => _refreshTokenRepository;
         public IRepositoryBase<UserRoleEntity> RoleRepository => _roleRepository;
 
-        public IdentityUnitOfWork(StudyHubDbContext identityDbContext)
+        public IdentityUnitOfWork(FamilyHubDbContext identityDbContext)
         {
             _identityDbContext = identityDbContext;
             _userRepository = new RepositoryBase<UserEntity>(_identityDbContext);

@@ -3,7 +3,7 @@ using Data.Database;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace Data.Accessor
+namespace Data.Accessor.Repositories
 {
     public class RepositoryBase<TEntity> : IRepositoryBase<TEntity>  where TEntity : AEntityBase
     {

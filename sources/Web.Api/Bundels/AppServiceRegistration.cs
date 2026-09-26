@@ -19,9 +19,10 @@ namespace Web.Api.Bundels
         private const string EmailOptionsSectionName = "Email";
         private const string SeqOptionsSectionName = "Seq";
         private const string AdminOptionsSectionName = "Admin";
+        private const string FamilyHubConnectionStringName = "FamilyHubContext";
 
         internal const string OpenApiDocumentName = "v1";
-        internal const string OpenApiDocumentTitle = "StudyHub API";
+        internal const string OpenApiDocumentTitle = "FamilyHub API";
 
         internal static void AddAppServices(this IServiceCollection services, IConfiguration configuration)
         {
@@ -71,10 +72,10 @@ namespace Web.Api.Bundels
 
         private static void AddDatabaseServices(this IServiceCollection services, IConfiguration configuration)
         {
-            var studyHubConnectionString = configuration.GetConnectionString(StudyHubDbContext.ConnectionStringName)
-                ?? throw new InvalidOperationException($"Connection string '{StudyHubDbContext.ConnectionStringName}' not found.");
+            var familyHubConnectionString = configuration.GetConnectionString(FamilyHubConnectionStringName)
+                ?? throw new InvalidOperationException($"Connection string '{FamilyHubConnectionStringName}' not found.");
 
-            services.AddDbContext<StudyHubDbContext>(options => options.UseMySQL(studyHubConnectionString));
+            services.AddDbContext<FamilyHubDbContext>(options => options.UseMySQL(familyHubConnectionString));
         }
 
         private static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)

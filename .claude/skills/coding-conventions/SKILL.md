@@ -1,16 +1,16 @@
 ---
 name: coding-conventions
-description: StudyHub C# coding conventions (layout, naming, namespaces, DI registration, options, file format, Git line endings). Use before writing or modifying any C# code, csproj, or appsettings in this repository, including new projects, services, controllers, entities and options classes.
+description: FamilyHub C# coding conventions (layout, naming, namespaces, DI registration, options, file format, Git line endings). Use before writing or modifying any C# code, csproj, or appsettings in this repository, including new projects, services, controllers, entities and options classes.
 ---
 
-# StudyHub coding conventions
+# FamilyHub coding conventions
 
 Follow these rules when writing or changing code in `sources/`. If existing code breaks a rule, match the rule, not the exception.
 
 ## Solution and projects
 
 - Every project uses `net10.0`, `<Nullable>enable</Nullable>` and `<ImplicitUsings>enable</ImplicitUsings>`.
-- Name projects `<Layer>.<Name>`, for example `Web.Api`, `Data.Database` or `Shared.Models`. Put each project in its layer folder in `sources/StudyHub.slnx`:
+- Name projects `<Layer>.<Name>`, for example `Web.Api`, `Data.Database` or `Shared.Models`. Put each project in its layer folder in `sources/FamilyHub.slnx`:
   - `/1 Web/`: hosts and the API.
   - `/2 Logic/`: business services.
   - `/3 Data/`: `Data.Database` holds the DbContext, entities and migrations. `Data.Accessor` holds data access.
@@ -72,17 +72,17 @@ Follow these rules when writing or changing code in `sources/`. If existing code
 - Every service must be resolved through DI. Never create a service with `new` inside another class. The same goes for repositories, accessors, `DbContext` and HTTP clients.
 - Use **constructor injection**, and store each dependency in a `private readonly` field:
   ```csharp
-  public class StudyService : IStudyService
+  public class FamilyService : IFamilyService
   {
-      private readonly IStudyAccessor _studyAccessor;
+      private readonly IFamilyAccessor _familyAccessor;
 
-      public StudyService(IStudyAccessor studyAccessor)
+      public FamilyService(IFamilyAccessor familyAccessor)
       {
-          _studyAccessor = studyAccessor;
+          _familyAccessor = familyAccessor;
       }
   }
   ```
-- Register every service behind an interface (`IStudyService` → `StudyService`) in `AppServiceRegistration`, and inject the interface, not the concrete class.
+- Register every service behind an interface (`IFamilyService` → `FamilyService`) in `AppServiceRegistration`, and inject the interface, not the concrete class.
 - Choose lifetimes deliberately:
   - `Scoped` is the default for anything that uses `DatabaseContext`.
   - `Singleton` is only for stateless, thread-safe services.

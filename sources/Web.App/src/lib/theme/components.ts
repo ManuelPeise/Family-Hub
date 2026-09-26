@@ -2,7 +2,7 @@ import type { Components, CSSObject, Theme } from "@mui/material/styles";
 import { radius } from "src/lib/theme/shape";
 
 /*
- * Component defaults that establish StudyHub behavior. Colors come from the CSS theme
+ * Component defaults that establish FamilyHub behavior. Colors come from the CSS theme
  * variables (theme.vars), so every override works in light and dark mode.
  */
 
