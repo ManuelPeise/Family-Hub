@@ -11,13 +11,21 @@ import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
 import MuiTypography from "@mui/material/Typography";
-import type React from "react";
+import React from "react";
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { LogoutIcon, MenuIcon } from "src/components/layout/icons";
+import {
+  LogoutIcon,
+  MenuIcon,
+  NotificationsIcon,
+} from "src/components/layout/icons";
 import type { NavItem } from "src/components/layout/types/NavItem";
+import { useComponentInitializationAsync } from "src/hooks/useComponentInitializationAsync";
+import type { NotificationModel } from "src/components/layout/types/NotificationModel";
+import { StatelessApiClient } from "src/lib/api/StatelessApi";
+import { Menu, MenuItem, Typography } from "@mui/material";
 
-interface Props {
+interface IProps {
   appName: string;
   userName: string;
   navItems: NavItem[];
@@ -29,8 +37,58 @@ interface Props {
   children: React.ReactNode;
 }
 
+interface IAppShellInitializationProps {
+  notificationModels: NotificationModel[];
+  updateNotification: (
+    notification: NotificationModel,
+    setState: (notifications: NotificationModel[]) => void,
+  ) => Promise<void>;
+}
+
+interface INotificationModelState {
+  notificationModels: NotificationModel[];
+  isNotificationMenuOpen: boolean;
+}
+
+const initializeAsync = async (): Promise<IAppShellInitializationProps> => {
+  const notificationApi = StatelessApiClient.create<
+    NotificationModel,
+    NotificationModel[]
+  >({
+    baseUrl: "api/usernotification/getusernotifications",
+  });
+
+  const [notifications] = await Promise.all([notificationApi.sendGet()]);
+
+  const updateNotification = async (
+    notification: NotificationModel,
+    setState: (notifications: NotificationModel[]) => void,
+  ) => {
+    const updatedNotifications = await notificationApi.sendPost({
+      body: notification,
+    });
+    setState(updatedNotifications);
+  };
+
+  return {
+    notificationModels: notifications,
+    updateNotification: updateNotification,
+  };
+};
+
+const AppShellContainer: React.FC<IProps> = (props) => {
+  const { initialized, model } =
+    useComponentInitializationAsync(initializeAsync);
+
+  if (!initialized || !model) {
+    return null;
+  }
+
+  return <AppShell {...props} {...model} />;
+};
+
 /** Frame for all pages after login: app bar on top, navigation in a drawer behind the menu button. */
-const AppShell: React.FC<Props> = ({
+const AppShell: React.FC<IProps & IAppShellInitializationProps> = ({
   appName,
   userName,
   navItems,
@@ -39,10 +97,27 @@ const AppShell: React.FC<Props> = ({
   logoutLabel,
   loggingOut,
   onLogout,
+  notificationModels,
+  updateNotification,
   children,
 }) => {
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const { pathname } = useLocation();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [notificationState, setNotificationState] =
+    useState<INotificationModelState>({
+      notificationModels: notificationModels,
+      isNotificationMenuOpen: false,
+    });
+
+  const handleUpdateNotificationState = React.useCallback(
+    (partialState: Partial<INotificationModelState>) => {
+      setNotificationState({
+        ...notificationState,
+        ...partialState,
+      });
+    },
+    [notificationState],
+  );
 
   return (
     <Box
@@ -98,6 +173,49 @@ const AppShell: React.FC<Props> = ({
             >
               {userName}
             </MuiTypography>
+
+            <IconButton
+              color="inherit"
+              disabled={
+                loggingOut || !notificationState.notificationModels.length
+              }
+              onClick={() => {
+                handleUpdateNotificationState({
+                  isNotificationMenuOpen:
+                    !notificationState.isNotificationMenuOpen,
+                });
+              }}
+            >
+              <NotificationsIcon />
+            </IconButton>
+            <Menu
+              anchorEl={
+                notificationState.isNotificationMenuOpen ? document.body : null
+              }
+              open={notificationState.isNotificationMenuOpen}
+              onClose={() => {
+                handleUpdateNotificationState({
+                  isNotificationMenuOpen: false,
+                });
+              }}
+            >
+              {notificationState.notificationModels.map((item, index) => (
+                <MenuItem
+                  key={index}
+                  onClick={() =>
+                    updateNotification.bind(null, {
+                      ...item,
+                      isActive: false,
+                    })
+                  }
+                >
+                  <Typography variant="body2">
+                    {item.messageResourceKey}
+                  </Typography>
+                </MenuItem>
+              ))}
+            </Menu>
+
             <Tooltip title={logoutLabel}>
               <span>
                 <IconButton
@@ -156,4 +274,4 @@ const AppShell: React.FC<Props> = ({
   );
 };
 
-export default AppShell;
+export default AppShellContainer;

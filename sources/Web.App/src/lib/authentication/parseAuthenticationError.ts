@@ -12,7 +12,7 @@ const parseAuthenticationError = (
   context: "login" | "register",
 ): AuthenticationError => {
   if (!(error instanceof ApiError)) {
-    // fetch throws a TypeError when the server can't be reached.
+    // axios throws a network error when the server can't be reached.
     return { messageKey: "errorNetwork", fieldErrors: {} };
   }
 

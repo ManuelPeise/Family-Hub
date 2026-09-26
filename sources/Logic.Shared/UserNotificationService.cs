@@ -29,7 +29,8 @@ namespace Logic.Shared
             try
             {
                 var notificationEntities = _applicationUnitOfWork.IdentityUnitOfWork.NotificationRepository.Query()
-                    .Where(n => n.UserId == CurrentUser.UserId); 
+                    .Where(n => n.UserId == CurrentUser.UserId)
+                    .ToList();
 
                 return MapToExportModel(notificationEntities.ToList());
             }

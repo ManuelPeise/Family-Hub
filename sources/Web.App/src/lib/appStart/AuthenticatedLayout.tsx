@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useNavigate } from "react-router-dom";
-import AppShell from "src/components/layout/AppShell";
+import AppShellContainer from "src/components/layout/AppShell";
 import { HomeIcon } from "src/components/layout/icons";
 import useAuthenticationState from "src/lib/authentication/hooks/useAuthenticationState";
 
@@ -19,7 +19,7 @@ const AuthenticatedLayout: React.FC = () => {
   };
 
   return (
-    <AppShell
+    <AppShellContainer
       appName={t("labelAppName")}
       userName={user?.userName ?? ""}
       navItems={[{ label: t("navHome"), to: "/home", icon: <HomeIcon /> }]}
@@ -32,7 +32,7 @@ const AuthenticatedLayout: React.FC = () => {
       }}
     >
       <Outlet />
-    </AppShell>
+    </AppShellContainer>
   );
 };
 

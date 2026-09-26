@@ -110,7 +110,7 @@ There are no tests yet. The esproj names Vitest as the test framework, but Vites
       form/              form components (Form, TextField, PasswordField, SubmitButton, ...)
     hooks/               app-wide hooks (useFormModel) with their types/
     lib/
-      api/               apiClient (fetch wrapper, silent refresh on 401)
+      api/               axiosClient (the axios instance), apiClient (apiRequest on top of it, silent refresh on 401)
       authentication/    auth state, service, route guards, shared form hook
       appStart/          AppStart, AppRoutes, AuthenticatedLayout
       utils/             small pure helpers (isRecord)
@@ -215,7 +215,7 @@ The backend is `../Web.Api` (`D:\WorkBench\Study-Hub\sources\Web.Api`), an ASP.N
 - **Routes** follow `api/[controller]/[action]` (`ApiControllerBase`); the action is the C# method name. Auth routes: `POST api/Authentication/Login` (`{ userNameOrEmail, password }`, 400 on wrong credentials), `POST api/Authentication/Logout`, `POST api/Authentication/Refresh` (rotates the cookies, 401 when the session is over), `GET api/Authentication/Session` (current user) and `POST api/Registration/Register` (`{ firstName?, lastName?, userName, email }`; the server emails a one-time password, the user is not logged in). Verify against the controller or OpenAPI document; don't invent routes.
 - **Authentication**: `Login` sets the JWT access and refresh tokens as HttpOnly cookies (`accessToken`, `refreshToken`, SameSite=Strict), and the API reads the access token from the cookie. The app never reads, parses, stores or manages tokens: not in localStorage, sessionStorage, React or other state, JavaScript-readable cookies or URLs. Authenticated requests are sent with credentials so the browser includes the cookies.
 - **Dev proxy and CORS**: `vite.config.ts` proxies `/api` to http://localhost:5069, so API calls are same-origin and the cookies work. The app only uses relative `/api/...` paths. The API's CORS policy is still `AllowAnyOrigin`, which browsers don't allow together with credentials; a deployment where app and API are on different origins needs a CORS policy with the app's origin and `AllowCredentials`.
-- **API client**: all requests go through `apiRequest` in `src/lib/api/apiClient.ts`. On a 401 it refreshes the session once (one shared refresh for parallel requests) and retries; if that fails it calls the session-expired handler, which logs the user out. It throws `ApiError` (status and parsed body) for error statuses. Validate response bodies with type guards instead of casting.
+- **API client**: all requests go through `apiRequest` in `src/lib/api/apiClient.ts`, which sends them with the shared axios instance from `src/lib/api/axiosClient.ts` (never import `axios` or call `fetch` elsewhere). On a 401 it refreshes the session once (one shared refresh for parallel requests) and retries; if that fails it calls the session-expired handler, which logs the user out. It throws `ApiError` (status and parsed body) for error statuses. Validate response bodies with type guards instead of casting.
 - **Auth state**: `AuthenticationStateProvider` restores the session on startup via `Session`; read it with `useAuthenticationState()` (`status`, `user`, `login`, `logout`). Login and registration forms share `useAuthenticationForm`, and API errors become translation keys through `parseAuthenticationError`.
 
 ### Shared.Models
