@@ -6,7 +6,7 @@ namespace Logic.Authentication.Interfaces
     public interface ITokenService
     {
         /// <summary>
-        /// Creates a signed JWT access token for the user. The user's roles must be loaded.
+        /// Creates a signed JWT access token for the user. The user's roles and scopes (with <c>Scope</c>) must be loaded.
         /// </summary>
         IssuedToken CreateAccessToken(UserEntity user);
 

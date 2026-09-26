@@ -39,7 +39,7 @@ namespace Logic.Authentication
                 ArgumentException.ThrowIfNullOrEmpty(request.Password, nameof(request.Password));
 
                 var identityUnitOfWork = _applicationUnitOfWork.IdentityUnitOfWork;
-                var userEntity = identityUnitOfWork.UserRepository.Query()
+                var userEntity = QueryUsersWithTokenClaims(identityUnitOfWork)
                     .Include(u => u.Credentials)
                     .FirstOrDefault(u => u.UserName == request.UserNameOrEmail || u.Email == request.UserNameOrEmail);
 
@@ -83,7 +83,7 @@ namespace Logic.Authentication
                 
                 var identityUnitOfWork = _applicationUnitOfWork.IdentityUnitOfWork;
                 
-                var userEntity = identityUnitOfWork.UserRepository.Query()
+                var userEntity = QueryUsersWithTokenClaims(identityUnitOfWork)
                     .Include(u => u.RefreshToken)
                     .Where(u => u.RefreshToken!.RefreshToken == _tokenService.HashRefreshToken(refreshToken))
                     .FirstOrDefault();
@@ -160,6 +160,18 @@ namespace Logic.Authentication
 
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Loads what <see cref="ITokenService.CreateAccessToken"/> writes into the token: roles and scopes.
+        /// </summary>
+        private static IQueryable<UserEntity> QueryUsersWithTokenClaims(IIdentityUnitOfWork identityUnitOfWork)
+        {
+            return identityUnitOfWork.UserRepository.Query()
+                                     .Include(u => u.Roles)
+                                     .Include(u => u.UserScopes)
+                                     .ThenInclude(us => us.Scope)
+                                     .AsSplitQuery();
         }
 
         private static void StoreRefreshToken(UserEntity userEntity, string refreshTokenHash, DateTime expiresAt)

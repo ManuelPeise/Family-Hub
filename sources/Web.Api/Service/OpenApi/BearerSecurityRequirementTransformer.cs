@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
+using Web.Api.Service.Attributes;
 
 namespace Web.Api.Service.OpenApi
 {
@@ -33,9 +34,26 @@ namespace Web.Api.Service.OpenApi
                                      .Select(a => a.Roles)
                                      .ToList();
 
+            var scopes = authorizeData.OfType<ApiAuthenticationAttribute>()
+                                      .Where(a => a.Scope.HasValue)
+                                      .Select(a => $"{a.Scope} ({a.ScopePermissions})")
+                                      .ToList();
+
+            var forbiddenReasons = new List<string>();
+
             if (roles.Count > 0)
             {
-                operation.Responses.TryAdd(StatusCodes.Status403Forbidden.ToString(), new OpenApiResponse { Description = $"Requires role: {string.Join(" and ", roles)}." });
+                forbiddenReasons.Add($"Requires role: {string.Join(" and ", roles)}.");
+            }
+
+            if (scopes.Count > 0)
+            {
+                forbiddenReasons.Add($"Requires scope: {string.Join(" and ", scopes)}.");
+            }
+
+            if (forbiddenReasons.Count > 0)
+            {
+                operation.Responses.TryAdd(StatusCodes.Status403Forbidden.ToString(), new OpenApiResponse { Description = string.Join(" ", forbiddenReasons) });
             }
 
             return Task.CompletedTask;

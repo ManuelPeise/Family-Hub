@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Data.Database.Context.Entities.Security;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Data.Database.Context.Entities.User
 {
@@ -9,9 +10,6 @@ namespace Data.Database.Context.Entities.User
         public string Email { get; set; } = null!;
         public string UserName { get; set; } = null!;
         public DateTime DateOfBirth { get; set; }
-
-        // Navigation property for the roles associated with the user
-        public ICollection<UserRoleEntity> Roles { get; set; } = [];
         // Foreign key for the UserCredentialsEntity
         public long CredentialsId { get; set; }
         [ForeignKey(nameof(CredentialsId))]
@@ -24,5 +22,8 @@ namespace Data.Database.Context.Entities.User
         public long? AppCredentialsId { get; set; }
         [ForeignKey(nameof(AppCredentialsId))]
         public UserAppCredentialsEntity? AppCredentials { get; set; }
+        // Navigation property for the roles associated with the user
+        public ICollection<UserRoleEntity> Roles { get; set; } = [];
+        public ICollection<UserScopeEntity> UserScopes { get; set; } = [];
     }
 }
