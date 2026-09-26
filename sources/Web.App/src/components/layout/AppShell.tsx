@@ -65,6 +65,7 @@ const initializeAsync = async (): Promise<IAppShellInitializationProps> => {
     setState: (notifications: NotificationModel[]) => void,
   ) => {
     const updatedNotifications = await notificationApi.sendPost({
+      baseUrl: "api/usernotification/updatenotification",
       body: notification,
     });
     setState(updatedNotifications);
