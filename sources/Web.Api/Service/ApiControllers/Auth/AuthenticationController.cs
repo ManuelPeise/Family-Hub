@@ -1,6 +1,10 @@
-﻿using Logic.Shared.Interfaces;
+﻿using Logic.Authentication;
+using Logic.Shared.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Shared.Models.Auth;
+using System.Security.Claims;
+using Web.Api.Service.Attributes;
 using Web.Api.Service.Auth;
 
 namespace Web.Api.Service.ApiControllers.Auth
@@ -29,11 +33,52 @@ namespace Web.Api.Service.ApiControllers.Auth
         }
 
         [HttpPost(Name = "Logout")]
-        public async Task<IActionResult> Authenticate([FromBody] AuthenticationRequest request)
+        public IActionResult Logout()
         {
             ClearTokenCookies();
 
             return Ok();
+        }
+
+        /// <summary>
+        /// Issues a new access token and rotates the refresh token, both read from and written to the HttpOnly cookies.
+        /// </summary>
+        [HttpPost(Name = "Refresh")]
+        public async Task<IActionResult> Refresh(CancellationToken cancellationToken)
+        {
+            var refreshToken = Request.Cookies[AuthCookieNames.RefreshToken];
+
+            var response = string.IsNullOrEmpty(refreshToken)
+                ? null
+                : await _authenticationService.RefreshToken(refreshToken, cancellationToken);
+
+            if (response == null)
+            {
+                ClearTokenCookies();
+
+                return Unauthorized();
+            }
+
+            SetTokenCookies(response);
+
+            return Ok();
+        }
+
+        /// <summary>
+        /// Returns the signed-in user from the access token claims. The frontend calls it on startup to restore the session.
+        /// </summary>
+        [HttpGet(Name = "Session")]
+        [ApiAuthentication]
+        public ActionResult<SessionResponse> Session()
+        {
+            return new SessionResponse
+            {
+                UserName = User.Identity?.Name ?? string.Empty,
+                Email = User.FindFirstValue(JwtRegisteredClaimNames.Email) ?? string.Empty,
+                Roles = User.FindAll(JwtTokenParameters.RoleClaimType)
+                            .Select(claim => claim.Value)
+                            .ToList(),
+            };
         }
 
         [NonAction]

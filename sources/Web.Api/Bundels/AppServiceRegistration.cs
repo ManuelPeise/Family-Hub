@@ -1,5 +1,4 @@
-﻿using Data.Database.Identity;
-using Data.Database.StudyHub;
+﻿using Data.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Shared.Models.Options;
@@ -72,13 +71,9 @@ namespace Web.Api.Bundels
 
         private static void AddDatabaseServices(this IServiceCollection services, IConfiguration configuration)
         {
-            var identityConnectionString = configuration.GetConnectionString(IdentityDbContext.ConnectionStringName)
-                ?? throw new InvalidOperationException($"Connection string '{IdentityDbContext.ConnectionStringName}' not found.");
-
             var studyHubConnectionString = configuration.GetConnectionString(StudyHubDbContext.ConnectionStringName)
                 ?? throw new InvalidOperationException($"Connection string '{StudyHubDbContext.ConnectionStringName}' not found.");
 
-            services.AddDbContext<IdentityDbContext>(options => options.UseMySQL(identityConnectionString));
             services.AddDbContext<StudyHubDbContext>(options => options.UseMySQL(studyHubConnectionString));
         }
 

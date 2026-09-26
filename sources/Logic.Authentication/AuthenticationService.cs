@@ -1,5 +1,5 @@
 ﻿using Data.Accessor.Interfaces;
-using Data.Database.Identity.Entities;
+using Data.Database.Context.Entities;
 using Logic.Authentication.Interfaces;
 using Logic.Shared.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -38,7 +38,9 @@ namespace Logic.Authentication
                 ArgumentException.ThrowIfNullOrEmpty(request.Password, nameof(request.Password));
 
                 var identityUnitOfWork = _applicationUnitOfWork.IdentityUnitOfWork;
-                var userEntity = await identityUnitOfWork.UserRepository.GetByUserNameOrEmailAsync(request.UserNameOrEmail, cancellationToken);
+                var userEntity = identityUnitOfWork.UserRepository.Query()
+                    .Include(u => u.Credentials)
+                    .FirstOrDefault(u => u.UserName == request.UserNameOrEmail || u.Email == request.UserNameOrEmail);
 
                 if (userEntity == null || userEntity.Credentials == null)
                 {
@@ -120,7 +122,8 @@ namespace Logic.Authentication
 
                 var identityUnitOfWork = _applicationUnitOfWork.IdentityUnitOfWork;
 
-                var existingUser = await identityUnitOfWork.UserRepository.GetByUserNameOrEmailAsync(request.UserName, CancellationToken.None);
+                var existingUser = identityUnitOfWork.UserRepository.Query()
+                    .FirstOrDefault(u => u.UserName == request.UserName || u.Email == request.UserName);
                 
                 if (existingUser != null)
                 {
@@ -131,6 +134,8 @@ namespace Logic.Authentication
 
                 var newUserEntity = new UserEntity
                 {
+                    FirstName = request.FirstName,
+                    LastName = request.LastName,
                     UserName = request.UserName,
                     Email = request.Email,
                     Credentials = new UserCredentialsEntity

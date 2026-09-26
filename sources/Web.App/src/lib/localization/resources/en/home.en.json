@@ -1,0 +1,4 @@
+{
+  "titleGreeting": "Hello, {{name}}!",
+  "textWelcome": "Good to see you."
+}

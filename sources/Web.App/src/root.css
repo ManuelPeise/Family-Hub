@@ -1,0 +1,31 @@
+/*
+ * Global base styles. Only rules that the MUI theme and CssBaseline don't cover.
+ * No colors, fonts or spacing here: those come from the theme.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}

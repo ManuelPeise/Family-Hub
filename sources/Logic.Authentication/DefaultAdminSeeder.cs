@@ -1,5 +1,5 @@
 ﻿using Data.Accessor.Interfaces;
-using Data.Database.Identity.Entities;
+using Data.Database.Context.Entities;
 using Logic.Authentication.Interfaces;
 using Logic.Shared.Interfaces;
 using Microsoft.Extensions.Logging;
