@@ -4,6 +4,7 @@
     {
         IIdentityUnitOfWork IdentityUnitOfWork { get; }
         IFamilyUnitOfWork FamilyUnitOfWork { get; }
+        IAdministrationUnitOfWork AdministrationUnitOfWork { get; }
         Task SaveChanges();
     }
 }

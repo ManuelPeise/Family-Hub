@@ -32,7 +32,12 @@ namespace Web.Api.Bundels
 
             app.UseCors();
 
-            app.UseHttpsRedirection();
+            // In Development the Vite proxy forwards /api to http://localhost:5069. A redirect to HTTPS would send the
+            // browser cross-origin to the API, where it drops the SameSite=Strict auth cookies, so every call ends in 401.
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseHttpsRedirection();
+            }
 
             app.UseAuthentication();
 

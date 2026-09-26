@@ -1,5 +1,4 @@
-﻿using Data.Database.Context;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Shared.Models.Options;
 using Data.Accessor.DI;
@@ -10,6 +9,8 @@ using Microsoft.Net.Http.Headers;
 using Web.Api.Service.Auth;
 using Web.Api.Service.OpenApi;
 using Logic.Shared.DI;
+using Data.Database.Context;
+using Logic.Administration.DI;
 
 namespace Web.Api.Bundels
 {
@@ -34,6 +35,7 @@ namespace Web.Api.Bundels
             services.AddDataAccessorServices();
             services.AddAuthenticationServices();
             services.AddSharedServices();
+            services.AddAdministrationServices();
 
             services.AddCorsServices();
 

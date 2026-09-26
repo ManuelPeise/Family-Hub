@@ -15,8 +15,9 @@ namespace Data.Database.Context.Configurations
 
             builder.ToTable(TableName);
 
+            // Only the SHA-256 hash of the token is stored (64 hex characters), never the token itself.
             builder.Property(t => t.RefreshToken)
-                   .HasMaxLength(ColumnLengths.Token)
+                   .HasMaxLength(ColumnLengths.Hash)
                    .IsRequired();
 
             builder.HasIndex(t => t.RefreshToken)

@@ -38,25 +38,25 @@ namespace Data.Database.Context.Configurations
             builder.HasIndex(u => u.UserName)
                    .IsUnique();
 
-            // The user holds the foreign keys, so the credential rows are the principals.
-            // Restrict / SetNull keep a credential delete from cascading into the user.
+            // The credential rows hold the UserId foreign key (unique, so one row per user) and are deleted with the user.
+            // The database can't force a user to have credentials; registration and the admin seeder always create them.
             builder.HasOne(u => u.Credentials)
-                   .WithOne()
-                   .HasForeignKey<UserEntity>(u => u.CredentialsId)
+                   .WithOne(c => c.User)
+                   .HasForeignKey<UserCredentialsEntity>(c => c.UserId)
                    .IsRequired()
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(u => u.RefreshToken)
-                   .WithOne()
-                   .HasForeignKey<UserEntity>(u => u.RefreshTokenId)
-                   .IsRequired(false)
-                   .OnDelete(DeleteBehavior.SetNull);
+                   .WithOne(t => t.User)
+                   .HasForeignKey<UserRefreshTokenEntity>(t => t.UserId)
+                   .IsRequired()
+                   .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(u => u.AppCredentials)
-                   .WithOne()
-                   .HasForeignKey<UserEntity>(u => u.AppCredentialsId)
-                   .IsRequired(false)
-                   .OnDelete(DeleteBehavior.SetNull);
+                   .WithOne(c => c.User)
+                   .HasForeignKey<UserAppCredentialsEntity>(c => c.UserId)
+                   .IsRequired()
+                   .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasMany(u => u.Roles)
                    .WithMany()

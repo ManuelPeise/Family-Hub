@@ -1,5 +1,4 @@
 ﻿using Data.Accessor.Interfaces;
-using Data.Database.Context.Entities;
 using Data.Database.Context.Entities.User;
 using Logic.Authentication.Interfaces;
 using Logic.Shared.Interfaces;
@@ -39,7 +38,7 @@ namespace Logic.Authentication
                 ArgumentException.ThrowIfNullOrEmpty(request.Password, nameof(request.Password));
 
                 var identityUnitOfWork = _applicationUnitOfWork.IdentityUnitOfWork;
-                var userEntity = identityUnitOfWork.UserRepository.Query()
+                var userEntity = QueryUsersWithTokenClaims(identityUnitOfWork)
                     .Include(u => u.Credentials)
                     .FirstOrDefault(u => u.UserName == request.UserNameOrEmail || u.Email == request.UserNameOrEmail);
 
@@ -83,7 +82,7 @@ namespace Logic.Authentication
                 
                 var identityUnitOfWork = _applicationUnitOfWork.IdentityUnitOfWork;
                 
-                var userEntity = identityUnitOfWork.UserRepository.Query()
+                var userEntity = QueryUsersWithTokenClaims(identityUnitOfWork)
                     .Include(u => u.RefreshToken)
                     .Where(u => u.RefreshToken!.RefreshToken == _tokenService.HashRefreshToken(refreshToken))
                     .FirstOrDefault();
@@ -115,51 +114,16 @@ namespace Logic.Authentication
             }
         }
 
-        public async Task<bool> RegisterUser(RegistrationRequest request)
+        /// <summary>
+        /// Loads what <see cref="ITokenService.CreateAccessToken"/> writes into the token: roles and scopes.
+        /// </summary>
+        private static IQueryable<UserEntity> QueryUsersWithTokenClaims(IIdentityUnitOfWork identityUnitOfWork)
         {
-            try
-            {
-                ArgumentException.ThrowIfNullOrEmpty(request.UserName, nameof(request.UserName));
-
-                var identityUnitOfWork = _applicationUnitOfWork.IdentityUnitOfWork;
-
-                var existingUser = identityUnitOfWork.UserRepository.Query()
-                    .FirstOrDefault(u => u.UserName == request.UserName || u.Email == request.UserName);
-                
-                if (existingUser != null)
-                {
-                    return false;
-                }
-
-                var onetimePassword = _passwordHasher.GetRandomOneTimePassword();
-
-                var newUserEntity = new UserEntity
-                {
-                    FirstName = request.FirstName,
-                    LastName = request.LastName,
-                    UserName = request.UserName,
-                    Email = request.Email,
-                    Credentials = new UserCredentialsEntity
-                    {
-                        PasswordHash = _passwordHasher.HashPassword(onetimePassword),
-                        CreatedBy = request.UserName,
-                    },
-                };
-
-                await identityUnitOfWork.UserRepository.AddAsync(newUserEntity, CancellationToken.None);
-
-                await _applicationUnitOfWork.SaveChanges();
-
-                await _emailNotificationHandler.SendRegistrationSuccessNotification(request.Email, onetimePassword);
-                
-                return true;
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError(exception, "Error occurred while registering user.");
-
-                return false;
-            }
+            return identityUnitOfWork.UserRepository.Query()
+                                     .Include(u => u.Roles)
+                                     .Include(u => u.UserScopes)
+                                     .ThenInclude(us => us.Scope)
+                                     .AsSplitQuery();
         }
 
         private static void StoreRefreshToken(UserEntity userEntity, string refreshTokenHash, DateTime expiresAt)

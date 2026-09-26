@@ -17,8 +17,7 @@ dotnet build FamilyHub.slnx
 dotnet run --project Web.Api                    # http://localhost:5069 (launch profile "http")
 dotnet run --project Web.Api --launch-profile https   # https://localhost:7150
 
-# EF Core migrations: the contexts live in Data.Database, Web.Api is the startup project
-dotnet ef migrations add <Name> --context IdentityDbContext --project Data.Database --startup-project Web.Api -o Identity/Migrations
+# EF Core migrations: the context lives in Data.Database, Web.Api is the startup project
 dotnet ef migrations add <Name> --context FamilyHubDbContext --project Data.Database --startup-project Web.Api -o FamilyHub/Migrations
 ```
 
@@ -44,7 +43,7 @@ Docker files are in `docker/`. Start them before running the API:
 
 | Service | Address | Matches config key |
 |---|---|---|
-| MySQL 8.4 | `localhost:3306`, DBs `FamilyHubContextDb` and `IdentityContextDb` (created by `docker/mysql-init/` on first start), user `DevUser` / `DevPassword123!` | `ConnectionStrings:FamilyHubContext`, `ConnectionStrings:IdentityContext` |
+| MySQL 8.4 | `localhost:3306`, DB `FamilyHubContextDb` (created by `MYSQL_DATABASE` on first start), user `DevUser` / `DevPassword123!` | `ConnectionStrings:FamilyHubContext` |
 | Mailpit | SMTP `localhost:1025`, UI http://localhost:8025 | `Email` |
 | Seq | UI + ingestion http://localhost:5341 | `Seq:ServerUrl` |
 

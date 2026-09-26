@@ -3,6 +3,7 @@ using Logic.Authentication.Interfaces;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using Shared.Enums.Security;
 using Shared.Models.Auth;
 using Shared.Models.Options;
 using System.Buffers.Text;
@@ -42,6 +43,9 @@ namespace Logic.Authentication
             // The enum name (not the display RoleName) is the claim value, so [ApiAuthentication(UserRoleEnum.X)] matches it.
             claims.AddRange(user.Roles.Select(r => new Claim(JwtTokenParameters.RoleClaimType, r.RoleType.ToString())));
 
+            claims.AddRange(user.UserScopes.SelectMany(us => JwtTokenParameters.CreateScopeClaimValues(us.Scope.ScopeType, GetPermissions(us)))
+                                           .Select(value => new Claim(JwtTokenParameters.ScopeClaimType, value)));
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Issuer = _jwtOptions.Issuer,
@@ -72,6 +76,33 @@ namespace Logic.Authentication
         public string HashRefreshToken(string refreshToken)
         {
             return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(refreshToken)));
+        }
+
+        private static ScopePermissionEnum GetPermissions(UserScopeEntity userScope)
+        {
+            var permissions = ScopePermissionEnum.None;
+
+            if (userScope.CanView)
+            {
+                permissions |= ScopePermissionEnum.View;
+            }
+
+            if (userScope.CanCreate)
+            {
+                permissions |= ScopePermissionEnum.Create;
+            }
+
+            if (userScope.CanEdit)
+            {
+                permissions |= ScopePermissionEnum.Edit;
+            }
+
+            if (userScope.CanDelete)
+            {
+                permissions |= ScopePermissionEnum.Delete;
+            }
+
+            return permissions;
         }
     }
 }

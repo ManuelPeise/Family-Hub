@@ -10,9 +10,11 @@
     <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
     <PackageReference Include="MailKit" Version="4.18.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.12" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.23.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Data.Accessor\Data.Accessor.csproj" />
     <ProjectReference Include="..\Shared.Enums\Shared.Enums.csproj" />
     <ProjectReference Include="..\Shared.Models\Shared.Models.csproj" />
   </ItemGroup>

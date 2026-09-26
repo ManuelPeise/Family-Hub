@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Data.Accessor\Data.Accessor.csproj" />
+    <ProjectReference Include="..\Logic.Shared\Logic.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

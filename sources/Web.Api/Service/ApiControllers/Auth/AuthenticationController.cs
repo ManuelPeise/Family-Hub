@@ -78,6 +78,9 @@ namespace Web.Api.Service.ApiControllers.Auth
                 Roles = User.FindAll(JwtTokenParameters.RoleClaimType)
                             .Select(claim => claim.Value)
                             .ToList(),
+                Scopes = User.FindAll(JwtTokenParameters.ScopeClaimType)
+                             .Select(claim => claim.Value)
+                             .ToList(),
             };
         }
 

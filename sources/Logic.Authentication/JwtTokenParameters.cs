@@ -1,5 +1,6 @@
 ﻿using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using Shared.Enums.Security;
 using Shared.Models.Options;
 using System.Text;
 
@@ -14,6 +15,7 @@ namespace Logic.Authentication
         public const string SigningAlgorithm = SecurityAlgorithms.HmacSha256;
         public const string NameClaimType = JwtRegisteredClaimNames.UniqueName;
         public const string RoleClaimType = "role";
+        public const string ScopeClaimType = "scope";
 
         private const int MinimumSigningKeyBytes = 32;
         private static readonly TimeSpan ClockSkew = TimeSpan.FromSeconds(30);
@@ -34,6 +36,17 @@ namespace Logic.Authentication
             {
                 throw new InvalidOperationException($"Jwt:SigningKey must be at least {MinimumSigningKeyBytes} bytes long for HMAC-SHA256.");
             }
+        }
+
+        /// <summary>
+        /// Returns one scope claim value per permission flag, e.g. "Administration:View" and "Administration:Edit".
+        /// The token writes these values and [ApiAuthentication(scope, permissions)] checks for them.
+        /// </summary>
+        public static IEnumerable<string> CreateScopeClaimValues(ScopeTypeEnum scopeType, ScopePermissionEnum permissions)
+        {
+            return Enum.GetValues<ScopePermissionEnum>()
+                       .Where(permission => permission != ScopePermissionEnum.None && permissions.HasFlag(permission))
+                       .Select(permission => $"{scopeType}:{permission}");
         }
 
         public static SymmetricSecurityKey CreateSigningKey(JwtOptions jwtOptions)
