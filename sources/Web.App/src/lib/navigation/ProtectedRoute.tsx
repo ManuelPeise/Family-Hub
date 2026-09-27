@@ -4,21 +4,21 @@ import { Navigate, Outlet } from "react-router-dom";
 import FullPageLoader from "src/components/layout/FullPageLoader";
 import useAuthenticationState from "src/hooks/useAuthenticationState";
 
-/** Guard for the public pages: signed-in users go straight to /home. */
-const Redirect: React.FC = () => {
+/** Guard for the signed-in pages: signed-out users go to the login page. */
+const ProtectedRoute: React.FC = () => {
   const { t } = useTranslation();
   const { isAuthenticated, isSessionRestored } = useAuthenticationState();
 
-  // Wait for the startup session restore, so a signed-in user doesn't see the public page flash first.
+  // Without this wait, reloading a signed-in page would redirect before the session is restored.
   if (!isSessionRestored) {
     return <FullPageLoader label={t("labelLoading")} />;
   }
 
-  if (isAuthenticated) {
-    return <Navigate to="/home" replace />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
   }
 
   return <Outlet />;
 };
 
-export default Redirect;
+export default ProtectedRoute;

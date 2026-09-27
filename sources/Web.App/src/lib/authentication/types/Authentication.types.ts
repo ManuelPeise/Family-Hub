@@ -1,7 +1,7 @@
 import type { Session } from "src/lib/session/types/Session.types";
 import type { RequestAccountModel } from "src/pages/Authentication/requestAccount/types/RequestAccountModel";
 export type AuthenticationRequest = {
-  emailOrUsername: string;
+  userNameOrEmail: string;
   password: string;
 };
 
@@ -20,6 +20,8 @@ export type LogoutCallback = () => Promise<void>;
 export type AuthenticationContextValue = {
   isAuthenticated: boolean;
   isLoading: boolean;
+  /** False until the startup session restore has finished, successfully or not. */
+  isSessionRestored: boolean;
   session: Session | null;
   error: Error | null;
   handleLogin: AuthenticationCallback;

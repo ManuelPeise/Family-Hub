@@ -8,7 +8,7 @@ import type { ApiRequestOptions } from "src/lib/api/types/ApiRequestOptions";
  * HttpOnly cookies that the browser sends itself; this module never sees a token.
  */
 
-const refreshEndpoint = "/api/Authentication/Refresh";
+const refreshEndpoint = "/Authentication/Refresh";
 
 let refreshPromise: Promise<boolean> | null = null;
 let sessionExpiredHandler: (() => void) | null = null;

@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { Outlet, useNavigate } from "react-router-dom";
 import AppShellContainer from "src/components/layout/AppShell";
 import { HomeIcon } from "src/components/layout/icons";
 import useAuthenticationState from "src/hooks/useAuthenticationState";
+import { useLocalization } from "src/hooks/useLocalization";
 
 /** Connects the authentication state to the app shell for all pages after login. */
 const AuthenticatedLayout: React.FC = () => {
-  const { t } = useTranslation();
+  const localization = useLocalization();
   const authenticationState = useAuthenticationState();
   const navigate = useNavigate();
   const [loggingOut, setLoggingOut] = useState(false);
@@ -20,12 +20,18 @@ const AuthenticatedLayout: React.FC = () => {
 
   return (
     <AppShellContainer
-      appName={t("labelAppName")}
+      appName={localization.getResource("common:labelAppName")}
       userName={authenticationState.session?.userName ?? ""}
-      navItems={[{ label: t("navHome"), to: "/home", icon: <HomeIcon /> }]}
-      menuLabel={t("labelOpenMenu")}
-      navigationLabel={t("labelNavigation")}
-      logoutLabel={t("labelLogout")}
+      navItems={[
+        {
+          label: localization.getResource("common:navHome"),
+          to: "/home",
+          icon: <HomeIcon />,
+        },
+      ]}
+      menuLabel={localization.getResource("common:labelOpenMenu")}
+      navigationLabel={localization.getResource("common:labelNavigation")}
+      logoutLabel={localization.getResource("common:labelLogout")}
       loggingOut={loggingOut}
       onLogout={() => {
         void handleLogout();

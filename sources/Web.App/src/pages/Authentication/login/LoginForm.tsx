@@ -8,7 +8,7 @@ import useAuthenticationState from "src/hooks/useAuthenticationState";
 import type { AuthenticationRequest } from "src/lib/authentication/types/Authentication.types";
 
 const initialModel: AuthenticationRequest = {
-  emailOrUsername: "",
+  userNameOrEmail: "",
   password: "",
 };
 
@@ -26,16 +26,17 @@ const LoginForm: React.FC = () => {
       <FormTextField
         label={getResource("auth:labelUserNameOrEmail")}
         autoComplete="username"
+        type="text"
         required
-        value={model.emailOrUsername}
+        value={model.userNameOrEmail}
         onChange={(value) => {
-          updateModel({ emailOrUsername: value });
+          updateModel({ userNameOrEmail: value });
         }}
       />
 
       <FormTextField
         label={getResource("auth:labelPassword")}
-        autoComplete="current-password"
+        type="password"
         required
         value={model.password}
         onChange={(value) => {

@@ -1,5 +1,6 @@
 import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import ProtectedRoute from "src/lib/navigation/ProtectedRoute";
 import Redirect from "src/lib/navigation/Redirect";
 import AuthenticatedLayout from "src/lib/appStart/AuthenticatedLayout";
 import HomePage from "src/pages/home/HomePage";
@@ -18,7 +19,7 @@ const AppRoutes: React.FC = () => {
       </Route>
 
       {/* Signed in, with app bar and drawer */}
-      <Route element={<Redirect />}>
+      <Route element={<ProtectedRoute />}>
         <Route element={<AuthenticatedLayout />}>
           <Route path="/home" element={<HomePage />} />
         </Route>

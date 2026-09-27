@@ -24,7 +24,7 @@ const initializeAsync = async (): Promise<INotificationInitializationProps> => {
     NotificationModel,
     NotificationModel[]
   >({
-    url: "/api/UserNotification/GetUserNotifications",
+    url: "/UserNotification/GetUserNotifications",
     isResponse: isNotificationModelList,
   });
 
@@ -35,7 +35,7 @@ const initializeAsync = async (): Promise<INotificationInitializationProps> => {
     setState: (notifications: NotificationModel[]) => void,
   ) => {
     const updatedNotifications = await notificationApi.sendPost({
-      url: "/api/UserNotification/UpdateUserNotifications",
+      url: "/UserNotification/UpdateUserNotifications",
       body: notification,
     });
     setState(updatedNotifications);
@@ -55,7 +55,7 @@ const NotificationContainer: React.FC = () => {
 
   if (
     !initialization.initialized ||
-    !initialization.model?.notificationModels.length
+    !initialization.model?.notificationModels
   ) {
     return null;
   }

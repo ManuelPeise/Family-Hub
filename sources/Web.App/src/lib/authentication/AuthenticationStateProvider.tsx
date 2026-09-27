@@ -16,10 +16,10 @@ import isSession from "src/lib/session/isSession";
 type Props = PropsWithChildren;
 
 const urls = {
-  authentication: "/api/Authentication/Login",
-  requestAccount: "/api/FamilyRequest/RequestFamilyAccess",
-  logout: "/api/Authentication/Logout",
-  session: "/api/Authentication/Session",
+  authentication: "/Authentication/Login",
+  requestAccount: "/FamilyRequest/RequestFamilyAccess",
+  logout: "/Authentication/Logout",
+  session: "/Authentication/Session",
 };
 
 const toError = (error: unknown): Error =>
@@ -30,6 +30,7 @@ const AuthenticationStateProvider: React.FC<Props> = ({ children }) => {
   const { session, setSession } = useSession();
   const { isLoading, handleIsLoadingChanged } = useLoadingState();
   const [error, setError] = useState<Error | null>(null);
+  const [isSessionRestored, setIsSessionRestored] = useState(false);
 
   /** Loads the signed-in user; throws ApiError if there is no valid session. */
   const loadSession = React.useCallback(async (): Promise<void> => {
@@ -65,10 +66,14 @@ const AuthenticationStateProvider: React.FC<Props> = ({ children }) => {
       setSession(null);
     });
 
-    loadSession().catch(() => {
-      // No valid session: the user is simply not signed in.
-      setSession(null);
-    });
+    loadSession()
+      .catch(() => {
+        // No valid session: the user is simply not signed in.
+        setSession(null);
+      })
+      .finally(() => {
+        setIsSessionRestored(true);
+      });
 
     return () => {
       setSessionExpiredHandler(null);
@@ -116,6 +121,7 @@ const AuthenticationStateProvider: React.FC<Props> = ({ children }) => {
     () => ({
       isAuthenticated: session !== null,
       isLoading,
+      isSessionRestored,
       session,
       error,
       handleLogin,
@@ -125,6 +131,7 @@ const AuthenticationStateProvider: React.FC<Props> = ({ children }) => {
     [
       session,
       isLoading,
+      isSessionRestored,
       error,
       handleLogin,
       handleRequestAccount,
