@@ -129,7 +129,7 @@ There are no tests yet. The esproj names Vitest as the test framework, but Vites
   - Folders start lower case: `components/layout/`, `lib/myPage/`, `types/`, `hooks/`.
   - Hooks and services start lower case and are named after what they export: `hooks/useSomeHook.ts`, `myPageService.ts`.
   - Components (`React.FC`) and types start upper case and are named after the component or type: `MyPage.tsx`, `types/SomeType.ts`.
-- Declare components with a named `Props` interface (ESLint enforces `interface` over `type` for object types), `React.FC<Props>` (or plain `React.FC` without props) and a default export:
+- Declare components with a named `Props` interface (ESLint allows both `interface` and `type` for object types), `React.FC<Props>` (or plain `React.FC` without props) and a default export:
 
   ```tsx
   interface Props {

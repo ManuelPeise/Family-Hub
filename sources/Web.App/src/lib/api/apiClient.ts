@@ -1,3 +1,4 @@
+import type { AxiosResponse } from "axios";
 import { axiosClient } from "src/lib/api/axiosClient";
 import { ApiError } from "src/lib/api/types/ApiError";
 import type { ApiRequestOptions } from "src/lib/api/types/ApiRequestOptions";
@@ -38,34 +39,41 @@ const refreshSession = (): Promise<boolean> => {
   return refreshPromise;
 };
 
-/** Sends a request and returns the parsed body. Throws ApiError for error statuses. */
-export const apiRequest = async (
+const request = (
+  url: string,
+  { method, body, params }: ApiRequestOptions,
+): Promise<AxiosResponse<unknown>> =>
+  axiosClient.request<unknown>({ url, method, data: body, params });
+
+/**
+ * Sends a request and returns the response for a success status. On a 401 it refreshes the session
+ * once and retries; if the refresh fails, the session-expired handler runs. Throws ApiError for
+ * every non-success status.
+ */
+export const sendRequest = async (
   url: string,
   options: ApiRequestOptions,
-): Promise<unknown> => {
-  const { method, body, params, refreshOnUnauthorized = true } = options;
+): Promise<AxiosResponse<unknown>> => {
+  const { refreshOnUnauthorized = true } = options;
 
-  const response = await axiosClient.request<unknown>({
-    url,
-    method,
-    data: body,
-    params,
-  });
+  let response = await request(url, options);
 
   if (response.status === 401 && refreshOnUnauthorized) {
     if (await refreshSession()) {
-      return apiRequest(url, { ...options, refreshOnUnauthorized: false });
+      response = await request(url, options);
+    } else {
+      sessionExpiredHandler?.();
     }
-
-    sessionExpiredHandler?.();
   }
 
   // axios returns an empty string for an empty body.
-  const responseBody = response.data === "" ? undefined : response.data;
-
-  if (!isSuccessStatus(response.status)) {
-    throw new ApiError(response.status, responseBody);
+  if (response.data === "") {
+    response.data = undefined;
   }
 
-  return responseBody;
+  if (!isSuccessStatus(response.status)) {
+    throw new ApiError(response.status, response.data);
+  }
+
+  return response;
 };

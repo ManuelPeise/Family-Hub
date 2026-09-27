@@ -1,51 +1,40 @@
-import { apiRequest } from "src/lib/api/apiClient";
+import { sendRequest } from "src/lib/api/apiClient";
+import type { StatelessApi } from "src/lib/api/types/StatelessApi";
+import type { StatelessApiOptions } from "src/lib/api/types/StatelessApiOptions";
+import type { StatelessApiRequest } from "src/lib/api/types/StatelessApiRequest";
 
-interface IStatelessApiOptions<TRequest> {
-  baseUrl?: string;
-  parameters?: Record<string, unknown>;
-  body?: TRequest;
-}
-
-interface IStatelessApiResult<TRequest, TResponse> {
-  sendGet: (options?: IStatelessApiOptions<TRequest>) => Promise<TResponse>;
-  sendPost: (options?: IStatelessApiOptions<TRequest>) => Promise<TResponse>;
-}
-
-/*
- * Typed GET/POST helpers on top of apiRequest, so they share the silent refresh on 401 and
- * throw ApiError for error statuses. Each create() call keeps its own options.
+/**
+ * Creates a small typed client for one API resource. Each request can override the default URL and
+ * query parameters; the response body is validated with isResponse before it is returned.
  */
-class StatelessApi {
-  public create<TRequest, TResponse>(
-    options: IStatelessApiOptions<TRequest>,
-  ): IStatelessApiResult<TRequest, TResponse> {
-    const send = async (
-      method: "GET" | "POST",
-      opts?: IStatelessApiOptions<TRequest>,
-    ): Promise<TResponse> => {
-      const requestOptions: IStatelessApiOptions<TRequest> = {
-        ...options,
-        ...opts,
-      };
-      if (!requestOptions.baseUrl) {
-        throw new Error(`Base URL is required for ${method} request`);
-      }
+const create = <TRequest, TResponse>({
+  url,
+  params,
+  isResponse,
+}: StatelessApiOptions<TResponse>): StatelessApi<TRequest, TResponse> => {
+  const send = async (
+    method: "GET" | "POST",
+    request: StatelessApiRequest<TRequest> = {},
+  ): Promise<TResponse> => {
+    const requestUrl = request.url ?? url;
 
-      const body = await apiRequest(requestOptions.baseUrl, {
-        method,
-        body: method === "POST" ? requestOptions.body : undefined,
-        params: requestOptions.parameters,
-      });
+    const response = await sendRequest(requestUrl, {
+      method,
+      body: request.body,
+      params: request.params ?? params,
+    });
 
-      // The response shape is not validated here; callers trust the backend DTO.
-      return body as TResponse;
-    };
+    if (!isResponse(response.data)) {
+      throw new Error(`Unexpected response from ${method} ${requestUrl}.`);
+    }
 
-    return {
-      sendGet: (opts) => send("GET", opts),
-      sendPost: (opts) => send("POST", opts),
-    };
-  }
-}
+    return response.data;
+  };
 
-export const StatelessApiClient = new StatelessApi();
+  return {
+    sendGet: (request) => send("GET", request),
+    sendPost: (request) => send("POST", request),
+  };
+};
+
+export const StatelessApiClient = { create };

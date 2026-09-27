@@ -1,6 +1,7 @@
 import i18n from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
+import type { Language } from "src/hooks/types/UseLocalisationResult";
 import authDe from "src/lib/localization/resources/de/auth.de.json";
 import commonDe from "src/lib/localization/resources/de/common.de.json";
 import homeDe from "src/lib/localization/resources/de/home.de.json";
@@ -27,7 +28,7 @@ export const resources = {
   },
 } as const;
 
-export const supportedLanguages = ["de", "en"] as const;
+export const supportedLanguages: Language[] = ["de", "en"] as const;
 
 i18n.on("languageChanged", (language) => {
   document.documentElement.lang = language;
