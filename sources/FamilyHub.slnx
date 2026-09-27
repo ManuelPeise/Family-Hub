@@ -10,6 +10,7 @@
     <Project Path="Logic.Administration/Logic.Administration.csproj" Id="9f09cf75-290a-42fd-9e27-062d3ab56b0c" />
     <Project Path="Logic.Authentication/Logic.Authentication.csproj" />
     <Project Path="Logic.Shared/Logic.Shared.csproj" />
+    <Project Path="Logic.UserService/Logic.UserService.csproj" Id="11cba5c4-ce8e-4a57-b164-b6492429b406" />
   </Folder>
   <Folder Name="/3 Data/">
     <Project Path="Data.Accessor/Data.Accessor.csproj" Id="97ba7bed-a89c-4b1e-88f6-ef759baf1f07" />

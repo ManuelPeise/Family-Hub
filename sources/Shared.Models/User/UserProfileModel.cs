@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Shared.Models.User
+﻿namespace Shared.Models.User
 {
-    public class UserProfile
+    public class UserProfileModel
     {
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
