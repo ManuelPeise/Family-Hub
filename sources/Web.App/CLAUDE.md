@@ -4,6 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **`ui-styling` skill** (`../../.claude/skills/ui-styling/SKILL.md`): Material UI usage, theme, `sx` vs `styled()`, colors, spacing, typography, icons, breakpoints and CSS. Load it before creating or changing components, pages, layouts, the theme, styling or CSS. Its rules win over personal preference.
 - **`check-ui-style` skill** (`/check-ui-style [files] [report]`): checks changed files against `ui-styling` and the mobile-first rules and fixes what it finds (`report` only lists findings). Run it after every UI change.
+- **`check-line-endings` skill** (`/check-line-endings [files] [report]`): checks files against the Git line-ending rules (LF in the repository, CRLF working copy on Windows, no mixed files) and fixes what it finds. Run it before committing.
 
 ## Role
 
@@ -35,7 +36,7 @@ Never claim a check passed or that behavior works unless it was actually run or 
 
 `Web.App` is the FamilyHub frontend: a React 19 + TypeScript single-page app built with Vite. It is part of the `1 Web` layer and is listed in `../FamilyHub.slnx` through `Web.App.esproj`, which runs `npm run dev` as its startup command. The .NET build does not build it (`ShouldRunBuildScript` is false).
 
-The app is at an early stage. `src/main.tsx` renders `AppStart` (`src/lib/appStart/AppStart.tsx`), which is still a placeholder.
+The app is at an early stage. `src/main.tsx` loads the i18n setup and `src/root.css`, then renders `AppStart` (`src/lib/appStart/AppStart.tsx`), which nests the providers: `AppThemeProvider` → `BrowserRouter` → `SessionProvider` → `AuthenticationStateProvider` → `AppRoutes`. Implemented so far: landing page, login, family account request (`/register`), home page, the app shell with a notification menu, and cookie-based authentication.
 
 ## Commands
 
@@ -57,7 +58,9 @@ There are no tests yet. The esproj names Vitest as the test framework, but Vites
 
 ## Stack
 
-- **React 19** with `react-dom` and `react-router-dom` 7. Routes are defined in `src/lib/appStart/AppRoutes.tsx`: `/`, `/login` and `/register` are public (`RedirectIfAuthenticated`), `/home` requires a login (`RequireAuthentication`) and renders inside `AuthenticatedLayout` (app bar and drawer).
+- **React 19** with `react-dom` and `react-router-dom` 7. Routes are defined in `src/lib/appStart/AppRoutes.tsx`: `/` (`LandingPage`), `/login` (`LoginPage`) and `/register` (`RequestAccountPage`) are public, `/home` (`HomePage`) renders inside `AuthenticatedLayout` (app bar, drawer, notifications), and every other path redirects to `/`. The route guard `src/lib/navigation/Redirect.tsx` is work in progress: it wraps both route groups but renders no `<Outlet />` yet, and there is no guard that sends signed-out users away from `/home`.
+- **axios** for HTTP, only through `src/lib/api/` (see [Web.Api](#webapi)).
+- **Other libraries**: `@mui/x-date-pickers` with `dayjs` (used by `FormDatePicker`), `lodash` (per-function imports such as `lodash/isEqual`).
 - **i18next** with `react-i18next` and `i18next-browser-languagedetector` for localization (see [Localization](#localization)).
 - **Material UI** (`@mui/material`, `@mui/icons-material`) with its Emotion peers (`@emotion/react`, `@emotion/styled`). It is the app's only UI framework, accessed through `src/components/` (see [UI components](#ui-components)). The theme with light and dark mode is in `src/lib/theme/` and provided by `AppThemeProvider` in `AppStart` (see the `ui-styling` skill). The font is Inter, self-hosted through `@fontsource-variable/inter`. `src/root.css` is the only global stylesheet (base rules only: box sizing, text size adjust, full-height `#root`, fluid images; no colors, fonts or spacing).
 - **TypeScript** in strict bundler mode. `tsconfig.app.json` enables `strict`, `noUncheckedIndexedAccess`, `noImplicitReturns`, `noImplicitOverride`, `noUnusedLocals`, `noUnusedParameters`, `verbatimModuleSyntax` and `erasableSyntaxOnly`. `tsconfig.node.json` (for `vite.config.ts`) uses the same checks. In practice:
@@ -105,28 +108,37 @@ There are no tests yet. The esproj names Vitest as the test framework, but Vites
 - Layout:
   ```text
   src/
+    assets/              images (background photos), imported by the pages
     components/          shared UI wrappers around MUI (the only MUI importers besides the theme)
-      layout/            layout and general components (Stack, Typography, Button, Link, Alert, AppShell, AuthLayout, ...) and icons.ts
-      form/              form components (Form, TextField, PasswordField, SubmitButton, ...)
-    hooks/               app-wide hooks (useFormModel) with their types/
-    lib/
-      api/               axiosClient (the axios instance), apiClient (apiRequest on top of it, silent refresh on 401)
-      authentication/    auth state, service, route guards, shared form hook
-      appStart/          AppStart, AppRoutes, AuthenticatedLayout
-      utils/             small pure helpers (isRecord)
+      layout/            layout and general components (Stack, Typography, Button, Link, Alert, AppShell,
+                         AuthLayout, LandingHero, FullPageLoader, Notification, ...), icons.ts, imageBackground.ts
+      form/              form components (Form, TextField, FormTextField, FormDatePicker, SubmitButton)
+    hooks/               app-wide hooks with their types/: useFormModel, useLocalization, useAuthenticationState,
+                         useSession, useLoadingState, useComponentInitializationAsync
+    lib/                 app infrastructure, no pages
+      api/               axiosClient (the axios instance), apiClient (sendRequest), StatelessApi, types/
+      appStart/          AppStart (providers), AppRoutes, AuthenticatedLayout
+      authentication/    AuthenticationStateProvider and its context, types/
+      localization/      i18n setup and resource files
+      navigation/        route guards (Redirect)
+      session/           SessionProvider and its context, isSession, types/
       theme/             theme: palette, typography, shadows, shape, component defaults, AppThemeProvider, useThemeMode
-      myPage/
+      utils/             small pure helpers (isRecord)
+    pages/
+      <area>/<page>/     e.g. Authentication/login/, Authentication/requestAccount/
+      <page>/            e.g. home/, landing/
         MyPage.tsx       the page component; one component per file, named after the component
+        MyForm.tsx       components only this page uses
         myPageService.ts services
         types/
           SomeType.ts    one type per file, named after the type
         hooks/
           useSomeHook.ts custom hooks, never next to the components
   ```
-- Everything a page uses (components, types, hooks, services) lives in that page's folder under `src/lib/<page>/`: components and services directly in it, types in `types/`, hooks in `hooks/`.
+- Everything a page uses (components, types, hooks, services) lives in that page's folder under `src/pages/`: components and services directly in it, types in `types/`, hooks in `hooks/`. Code used by several pages goes to `src/components/` (UI), `src/hooks/` (hooks) or `src/lib/` (infrastructure).
 - Put each type in its own file, named after the type, in the page's `types/` folder. The only exception is a component's own `Props` type, which stays in the component file.
 - Naming of folders and files:
-  - Folders start lower case: `components/layout/`, `lib/myPage/`, `types/`, `hooks/`.
+  - Folders start lower case: `components/layout/`, `pages/home/`, `types/`, `hooks/`. (`pages/Authentication/` is an existing exception.)
   - Hooks and services start lower case and are named after what they export: `hooks/useSomeHook.ts`, `myPageService.ts`.
   - Components (`React.FC`) and types start upper case and are named after the component or type: `MyPage.tsx`, `types/SomeType.ts`.
 - Declare components with a named `Props` interface (ESLint allows both `interface` and `type` for object types), `React.FC<Props>` (or plain `React.FC` without props) and a default export:
@@ -188,7 +200,7 @@ src/lib/localization/
 
 - **Language**: `i18next-browser-languagedetector` picks the language from localStorage (key `language`), then the browser language. Region variants map to the base language (`de-AT` → `de`), and unsupported languages fall back to `en`. The `<html lang>` attribute follows the current language.
 - **Namespaces**: each resource file is one namespace named after the file (`common.de.json` / `common.en.json` → `common`). `common` is the default namespace.
-- **Usage**: `const { t } = useTranslation();` for `common`, `useTranslation("<name>")` for another namespace. Keys are type-checked, so `t("unknownKey")` fails the build.
+- **Usage**: `const { t } = useTranslation();` for `common`, `useTranslation("<name>")` for another namespace. Components that need keys from several namespaces use `useLocalization()` (`src/hooks/useLocalization.ts`): `getResource("auth:labelPassword")` takes a namespace-prefixed key, and `selectLanguage("de" | "en")` switches the language. Keys are type-checked either way, so an unknown key fails the build. A new namespace must also be added to the `namespaces` list in `useLocalization`.
 - Never hard-code user-visible text in components. Every label, button text, message and error shown to users comes from a resource file.
 - A resource file is a flat JSON object of camelCase keys:
   ```json
@@ -209,14 +221,17 @@ src/lib/localization/
 
 ### Web.Api
 
-The backend is `../Web.Api` (`D:\WorkBench\Study-Hub\sources\Web.Api`), an ASP.NET Core Web API described in `../../CLAUDE.md`. Read it when a task touches data the app loads or sends, and don't guess request or response shapes that the backend can confirm.
+The backend is `../Web.Api` (`D:\WorkBench\Family-Hub\sources\Web.Api`), an ASP.NET Core Web API described in `../../CLAUDE.md`. Read it when a task touches data the app loads or sends, and don't guess request or response shapes that the backend can confirm.
 
 - **Addresses**: http://localhost:5069 and https://localhost:7150. In Development, the OpenAPI document is at `/openapi/v1.json` and Swagger UI at `/swagger`. Use them to check endpoints, methods, DTOs, route parameters and status codes.
-- **Routes** follow `api/[controller]/[action]` (`ApiControllerBase`); the action is the C# method name. Auth routes: `POST api/Authentication/Login` (`{ userNameOrEmail, password }`, 400 on wrong credentials), `POST api/Authentication/Logout`, `POST api/Authentication/Refresh` (rotates the cookies, 401 when the session is over), `GET api/Authentication/Session` (current user) and `POST api/Registration/Register` (`{ firstName?, lastName?, userName, email }`; the server emails a one-time password, the user is not logged in). Verify against the controller or OpenAPI document; don't invent routes.
+- **Routes** follow `api/[controller]/[action]` (`ApiControllerBase`); the action is the C# method name. Auth routes: `POST api/Authentication/Login` (`{ userNameOrEmail, password }`, 400 on wrong credentials), `POST api/Authentication/Logout`, `POST api/Authentication/Refresh` (rotates the cookies, 401 when the session is over), `GET api/Authentication/Session` (current user, `SessionResponse`: `{ userName, email, roles, scopes }`). Other routes: `POST api/FamilyRequest/RequestFamilyAccess` (`FamilyMemberRequest`; 409 when the family was already requested or the email is in use), `GET api/UserNotification/GetUserNotifications` and `POST api/UserNotification/UpdateUserNotifications` (both return the user's `NotificationExportModel` list). Controllers are in `../Web.Api/Service/ApiControllers/`. Verify against the controller or OpenAPI document; don't invent routes. Route paths in the app always start with `/api/`, never `api/`, which would resolve against the current page URL.
 - **Authentication**: `Login` sets the JWT access and refresh tokens as HttpOnly cookies (`accessToken`, `refreshToken`, SameSite=Strict), and the API reads the access token from the cookie. The app never reads, parses, stores or manages tokens: not in localStorage, sessionStorage, React or other state, JavaScript-readable cookies or URLs. Authenticated requests are sent with credentials so the browser includes the cookies.
 - **Dev proxy and CORS**: `vite.config.ts` proxies `/api` to http://localhost:5069, so API calls are same-origin and the cookies work. The app only uses relative `/api/...` paths. The API's CORS policy is still `AllowAnyOrigin`, which browsers don't allow together with credentials; a deployment where app and API are on different origins needs a CORS policy with the app's origin and `AllowCredentials`.
-- **API client**: all requests go through `apiRequest` in `src/lib/api/apiClient.ts`, which sends them with the shared axios instance from `src/lib/api/axiosClient.ts` (never import `axios` or call `fetch` elsewhere). On a 401 it refreshes the session once (one shared refresh for parallel requests) and retries; if that fails it calls the session-expired handler, which logs the user out. It throws `ApiError` (status and parsed body) for error statuses. Validate response bodies with type guards instead of casting.
-- **Auth state**: `AuthenticationStateProvider` restores the session on startup via `Session`; read it with `useAuthenticationState()` (`status`, `user`, `login`, `logout`). Login and registration forms share `useAuthenticationForm`, and API errors become translation keys through `parseAuthenticationError`.
+- **API client**: all requests go through `sendRequest(url, options)` in `src/lib/api/apiClient.ts`, which sends them with the shared axios instance from `src/lib/api/axiosClient.ts` (never import `axios` or call `fetch` elsewhere). On a 401 it refreshes the session once (one shared refresh for parallel requests) and retries; if that fails it calls the session-expired handler, which clears the session. Pass `refreshOnUnauthorized: false` for endpoints where a 401 is the real answer (login, logout). It returns the `AxiosResponse` for 2xx (an empty body becomes `undefined`) and throws `ApiError` (status and parsed body) otherwise.
+- **Typed resource clients**: `StatelessApiClient.create<TRequest, TResponse>({ url, params?, isResponse })` in `src/lib/api/StatelessApi.ts` returns `sendGet` / `sendPost`, which resolve with the validated body. Each call can override `url`, `params` and (POST only) `body`. `isResponse` is a required type guard (for example `isNotificationModelList`); validate response bodies with type guards like this instead of casting.
+- **Auth state**: `AuthenticationStateProvider` (inside `SessionProvider`) restores the session on startup via `Session` and registers the session-expired handler. Read it with `useAuthenticationState()`: `isAuthenticated` (derived from `session`), `isLoading`, `session`, `error`, `handleLogin`, `handleRequestAccount`, `handleLogout`. The handlers catch errors themselves and put them into `error`. `useSession()` gives direct access to the session state.
+
+Known contract mismatch: the TypeScript `AuthenticationRequest` sends `emailOrUsername`, but the backend expects `userNameOrEmail`, so login fails until the field is renamed.
 
 ### Shared.Models
 
