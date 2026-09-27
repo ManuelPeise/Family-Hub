@@ -1,5 +1,4 @@
 import AppBar from "@mui/material/AppBar";
-import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
@@ -9,37 +8,30 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
-import Tooltip from "@mui/material/Tooltip";
 import MuiTypography from "@mui/material/Typography";
 import React from "react";
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { LogoutIcon, MenuIcon } from "src/components/layout/icons";
+import { MenuIcon } from "src/components/layout/icons";
 import type { NavItem } from "src/components/layout/types/NavItem";
 import NotificationContainer from "src/components/layout/Notification";
+import UserAppBarMenu from "src/components/user/UserAppBarMenu";
 
 interface IProps {
   appName: string;
-  userName: string;
   navItems: NavItem[];
   menuLabel: string;
   navigationLabel: string;
   logoutLabel: string;
-  loggingOut: boolean;
-  onLogout: () => void;
   children: React.ReactNode;
 }
 
 /** Frame for all pages after login: app bar on top, navigation in a drawer behind the menu button. */
 const AppShell: React.FC<IProps> = ({
   appName,
-  userName,
   navItems,
   menuLabel,
   navigationLabel,
-  logoutLabel,
-  loggingOut,
-  onLogout,
   children,
 }) => {
   const { pathname } = useLocation();
@@ -78,42 +70,8 @@ const AppShell: React.FC<IProps> = ({
             spacing={1}
             sx={{ alignItems: "center", minWidth: 0 }}
           >
-            <Tooltip title={userName}>
-              <Avatar
-                sx={{
-                  width: 32,
-                  height: 32,
-                  bgcolor: "primary.main",
-                  color: "primary.contrastText",
-                }}
-              >
-                {userName.charAt(0).toUpperCase()}
-              </Avatar>
-            </Tooltip>
-            {/* On phones only the avatar (with tooltip) is shown to save space. */}
-            <MuiTypography
-              variant="subtitle2"
-              component="span"
-              noWrap
-              sx={{ display: { xs: "none", sm: "block" }, maxWidth: 240 }}
-            >
-              {userName}
-            </MuiTypography>
-
             <NotificationContainer />
-
-            <Tooltip title={logoutLabel}>
-              <span>
-                <IconButton
-                  color="inherit"
-                  aria-label={logoutLabel}
-                  disabled={loggingOut}
-                  onClick={onLogout}
-                >
-                  <LogoutIcon />
-                </IconButton>
-              </span>
-            </Tooltip>
+            <UserAppBarMenu />
           </Stack>
         </Toolbar>
       </AppBar>

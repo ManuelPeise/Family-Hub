@@ -36,5 +36,7 @@
   "errorNetwork": "Keine Verbindung zum Server. Prüfe deine Internetverbindung und versuche es erneut.",
   "errorUnknown": "Das hat nicht geklappt. Versuche es in einem Moment noch einmal.",
   "labelFamilyName": "Familienname",
-  "labelDateOfBirth": "Geburtsdatum"
+  "labelDateOfBirth": "Geburtsdatum",
+  "labelLogout": "Abmelden",
+  "labelProfile": "Profil"
 }
