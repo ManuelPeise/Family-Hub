@@ -1,25 +1,25 @@
 import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import ProtectedRoute from "src/lib/navigation/ProtectedRoute";
+import Redirect from "src/lib/navigation/Redirect";
 import AuthenticatedLayout from "src/lib/appStart/AuthenticatedLayout";
-import RedirectIfAuthenticated from "src/lib/authentication/RedirectIfAuthenticated";
-import RequireAuthentication from "src/lib/authentication/RequireAuthentication";
-import HomePage from "src/lib/home/HomePage";
-import LandingPage from "src/lib/landing/LandingPage";
-import LoginPage from "src/lib/login/LoginPage";
-import RegisterPage from "src/lib/register/RegisterPage";
+import HomePage from "src/pages/home/HomePage";
+import LandingPage from "src/pages/landing/LandingPage";
+import LoginPage from "src/pages/Authentication/login/LoginPage";
+import RegisterPage from "src/pages/Authentication/requestAccount/RequestAccountPage";
 
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
       {/* Public, without app bar */}
-      <Route element={<RedirectIfAuthenticated />}>
+      <Route element={<Redirect />}>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
       </Route>
 
       {/* Signed in, with app bar and drawer */}
-      <Route element={<RequireAuthentication />}>
+      <Route element={<ProtectedRoute />}>
         <Route element={<AuthenticatedLayout />}>
           <Route path="/home" element={<HomePage />} />
         </Route>

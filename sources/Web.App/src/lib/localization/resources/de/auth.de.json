@@ -34,5 +34,7 @@
   "errorInvalidCredentials": "Benutzername oder Passwort ist falsch.",
   "errorRegistrationFailed": "Die Registrierung hat nicht geklappt. Vielleicht sind Benutzername oder E-Mail-Adresse schon vergeben.",
   "errorNetwork": "Keine Verbindung zum Server. Prüfe deine Internetverbindung und versuche es erneut.",
-  "errorUnknown": "Das hat nicht geklappt. Versuche es in einem Moment noch einmal."
+  "errorUnknown": "Das hat nicht geklappt. Versuche es in einem Moment noch einmal.",
+  "labelFamilyName": "Familienname",
+  "labelDateOfBirth": "Geburtsdatum"
 }

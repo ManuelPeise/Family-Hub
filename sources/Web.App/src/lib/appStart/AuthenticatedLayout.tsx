@@ -1,38 +1,44 @@
 import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { Outlet, useNavigate } from "react-router-dom";
-import AppShell from "src/components/layout/AppShell";
+import AppShellContainer from "src/components/layout/AppShell";
 import { HomeIcon } from "src/components/layout/icons";
-import useAuthenticationState from "src/lib/authentication/hooks/useAuthenticationState";
+import useAuthenticationState from "src/hooks/useAuthenticationState";
+import { useLocalization } from "src/hooks/useLocalization";
 
 /** Connects the authentication state to the app shell for all pages after login. */
 const AuthenticatedLayout: React.FC = () => {
-  const { t } = useTranslation();
-  const { user, logout } = useAuthenticationState();
+  const localization = useLocalization();
+  const authenticationState = useAuthenticationState();
   const navigate = useNavigate();
   const [loggingOut, setLoggingOut] = useState(false);
 
   const handleLogout = async () => {
     setLoggingOut(true);
-    await logout();
+    await authenticationState.handleLogout();
     await navigate("/", { replace: true });
   };
 
   return (
-    <AppShell
-      appName={t("labelAppName")}
-      userName={user?.userName ?? ""}
-      navItems={[{ label: t("navHome"), to: "/home", icon: <HomeIcon /> }]}
-      menuLabel={t("labelOpenMenu")}
-      navigationLabel={t("labelNavigation")}
-      logoutLabel={t("labelLogout")}
+    <AppShellContainer
+      appName={localization.getResource("common:labelAppName")}
+      userName={authenticationState.session?.userName ?? ""}
+      navItems={[
+        {
+          label: localization.getResource("common:navHome"),
+          to: "/home",
+          icon: <HomeIcon />,
+        },
+      ]}
+      menuLabel={localization.getResource("common:labelOpenMenu")}
+      navigationLabel={localization.getResource("common:labelNavigation")}
+      logoutLabel={localization.getResource("common:labelLogout")}
       loggingOut={loggingOut}
       onLogout={() => {
         void handleLogout();
       }}
     >
       <Outlet />
-    </AppShell>
+    </AppShellContainer>
   );
 };
 

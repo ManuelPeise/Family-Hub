@@ -1,78 +1,148 @@
-import type React from "react";
-import { useEffect, useState } from "react";
-import { setSessionExpiredHandler } from "src/lib/api/apiClient";
-import { AuthenticationContext } from "src/lib/authentication/authenticationContext";
-import * as authenticationService from "src/lib/authentication/authenticationService";
-import type { AuthenticationState } from "src/lib/authentication/types/AuthenticationState";
-import type { AuthenticationStatus } from "src/lib/authentication/types/AuthenticationStatus";
-import type { LoginRequest } from "src/lib/authentication/types/LoginRequest";
-import type { SessionUser } from "src/lib/authentication/types/SessionUser";
+import React, { useState, type PropsWithChildren } from "react";
+import type {
+  AuthenticationCallback,
+  AuthenticationContextValue,
+  AuthenticationRequest,
+  LogoutCallback,
+  RequestAccountCallback,
+  RequestAccountRequest,
+} from "src/lib/authentication/types/Authentication.types";
+import { useLoadingState } from "src/hooks/useLoadingState";
+import { sendRequest, setSessionExpiredHandler } from "src/lib/api/apiClient";
+import { useSession } from "src/hooks/useSession";
+import { AuthenticationStateContext } from "src/lib/authentication/AuthenticationStateContext";
+import isSession from "src/lib/session/isSession";
 
-interface Props {
-  children: React.ReactNode;
-}
+type Props = PropsWithChildren;
 
+const urls = {
+  authentication: "/Authentication/Login",
+  requestAccount: "/FamilyRequest/RequestFamilyAccess",
+  logout: "/Authentication/Logout",
+  session: "/Authentication/Session",
+};
+
+const toError = (error: unknown): Error =>
+  error instanceof Error ? error : new Error(String(error));
+
+/** Must be rendered inside a SessionProvider, which holds the session it fills. */
 const AuthenticationStateProvider: React.FC<Props> = ({ children }) => {
-  const [status, setStatus] = useState<AuthenticationStatus>("loading");
-  const [user, setUser] = useState<SessionUser | null>(null);
+  const { session, setSession } = useSession();
+  const { isLoading, handleIsLoadingChanged } = useLoadingState();
+  const [error, setError] = useState<Error | null>(null);
+  const [isSessionRestored, setIsSessionRestored] = useState(false);
 
-  const startSession = (sessionUser: SessionUser) => {
-    setUser(sessionUser);
-    setStatus("authenticated");
-  };
+  /** Loads the signed-in user; throws ApiError if there is no valid session. */
+  const loadSession = React.useCallback(async (): Promise<void> => {
+    const response = await sendRequest(urls.session, { method: "GET" });
 
-  const clearSession = () => {
-    setUser(null);
-    setStatus("anonymous");
-  };
+    if (!isSession(response.data)) {
+      throw new Error("Unexpected session response.");
+    }
 
-  // Restore the session from the auth cookies on startup, and log out once a refresh fails.
-  useEffect(() => {
-    let active = true;
+    setSession(response.data);
+  }, [setSession]);
 
+  /** Runs a user action with a shared loading and error state. */
+  const runAction = React.useCallback(
+    async (action: () => Promise<void>): Promise<void> => {
+      setError(null);
+      handleIsLoadingChanged(true);
+
+      try {
+        await action();
+      } catch (actionError) {
+        setError(toError(actionError));
+      } finally {
+        handleIsLoadingChanged(false);
+      }
+    },
+    [handleIsLoadingChanged],
+  );
+
+  // Restores the session from the auth cookies on startup and clears it once a refresh fails.
+  React.useEffect(() => {
     setSessionExpiredHandler(() => {
-      setUser(null);
-      setStatus("anonymous");
+      setSession(null);
     });
 
-    authenticationService
-      .getSession()
-      .then((sessionUser) => {
-        if (active) {
-          setUser(sessionUser);
-          setStatus("authenticated");
-        }
-      })
+    loadSession()
       .catch(() => {
-        if (active) {
-          setUser(null);
-          setStatus("anonymous");
-        }
+        // No valid session: the user is simply not signed in.
+        setSession(null);
+      })
+      .finally(() => {
+        setIsSessionRestored(true);
       });
 
     return () => {
-      active = false;
       setSessionExpiredHandler(null);
     };
-  }, []);
+  }, [loadSession, setSession]);
 
-  const login = async (request: LoginRequest) => {
-    await authenticationService.login(request);
-    startSession(await authenticationService.getSession());
-  };
+  const handleLogin: AuthenticationCallback = React.useCallback(
+    (request: AuthenticationRequest) =>
+      runAction(async () => {
+        await sendRequest(urls.authentication, {
+          method: "POST",
+          body: request,
+          refreshOnUnauthorized: false,
+        });
+        await loadSession();
+      }),
+    [runAction, loadSession],
+  );
 
-  const logout = async () => {
-    try {
-      await authenticationService.logout();
-    } finally {
-      clearSession();
-    }
-  };
+  const handleRequestAccount: RequestAccountCallback = React.useCallback(
+    (request: RequestAccountRequest) =>
+      runAction(async () => {
+        await sendRequest(urls.requestAccount, {
+          method: "POST",
+          body: request,
+        });
+      }),
+    [runAction],
+  );
 
-  const value: AuthenticationState = { status, user, login, logout };
+  const handleLogout: LogoutCallback = React.useCallback(
+    () =>
+      runAction(async () => {
+        // Clears the cookies.
+        await sendRequest(urls.logout, {
+          method: "POST",
+          refreshOnUnauthorized: false,
+        });
+        setSession(null);
+      }),
+    [runAction, setSession],
+  );
+
+  const contextValue: AuthenticationContextValue = React.useMemo(
+    () => ({
+      isAuthenticated: session !== null,
+      isLoading,
+      isSessionRestored,
+      session,
+      error,
+      handleLogin,
+      handleRequestAccount,
+      handleLogout,
+    }),
+    [
+      session,
+      isLoading,
+      isSessionRestored,
+      error,
+      handleLogin,
+      handleRequestAccount,
+      handleLogout,
+    ],
+  );
 
   return (
-    <AuthenticationContext value={value}>{children}</AuthenticationContext>
+    <AuthenticationStateContext value={contextValue}>
+      {children}
+    </AuthenticationStateContext>
   );
 };
 

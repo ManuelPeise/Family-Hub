@@ -20,5 +20,12 @@ namespace Web.Api.Service.ApiControllers.Notifications
         {
             return await _userNotificationService.GetUserNotificationsAsync();
         }
+
+        [ApiAuthentication(roles: AuthenticationRoleParameters.AllUserRoles)]
+        [HttpPost(Name = "UpdateUserNotifications")]
+        public async Task<List<NotificationExportModel>> UpdateUserNotifications([FromBody] NotificationExportModel notification)
+        {
+            return await _userNotificationService.UpdateUserNotificationsAsync(notification);
+        }
     }
 }

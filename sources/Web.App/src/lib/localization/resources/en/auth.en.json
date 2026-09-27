@@ -34,5 +34,7 @@
   "errorInvalidCredentials": "User name or password is incorrect.",
   "errorRegistrationFailed": "Registration didn't work. The user name or email address may already be taken.",
   "errorNetwork": "Can't reach the server. Check your internet connection and try again.",
-  "errorUnknown": "Something went wrong. Please try again in a moment."
+  "errorUnknown": "Something went wrong. Please try again in a moment.",
+  "labelFamilyName": "Family name",
+  "labelDateOfBirth": "Date of birth"
 }

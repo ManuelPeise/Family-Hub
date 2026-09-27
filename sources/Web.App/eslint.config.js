@@ -28,6 +28,10 @@ export default defineConfig([
         tsconfigRootDir: import.meta.dirname,
       },
     },
+    rules: {
+      // Object types may be declared with either `type` or `interface`.
+      "@typescript-eslint/consistent-type-definitions": "off",
+    },
   },
   {
     files: ["src/**/*.{ts,tsx}"],

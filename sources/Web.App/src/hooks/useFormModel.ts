@@ -1,27 +1,35 @@
 import React from "react";
+import isEqual from "lodash/isEqual";
 import type { UseFormModelResult } from "src/hooks/types/UseFormModelResult";
 import type { ValidationCallback } from "src/hooks/types/ValidationCallback";
-import type { ValidationErrors } from "src/hooks/types/ValidationErrors";
 
-export const useFormModel = <
-  TModel extends object,
-  TMessage extends string = string,
->(
+/**
+ * Holds a form's model. initialModel is read on the first render only, like useState; isModified
+ * and resetModel refer to that first value.
+ */
+export const useFormModel = <TModel>(
   initialModel: TModel,
-  validationCallback?: ValidationCallback<TModel, TMessage>,
-): UseFormModelResult<TModel, TMessage> => {
+  validationCallback?: ValidationCallback<TModel>,
+): UseFormModelResult<TModel> => {
+  const [initial] = React.useState(initialModel);
   const [model, setModel] = React.useState(initialModel);
 
-  const updateModel = (updates: Partial<TModel>) => {
-    setModel((prevModel) => ({ ...prevModel, ...updates }));
-  };
+  // Functional update: consecutive updates in one event don't overwrite each other.
+  const updateModel = React.useCallback((updates: Partial<TModel>) => {
+    setModel((current) => ({ ...current, ...updates }));
+  }, []);
 
-  // Derived from the model on every render, so errors can never be out of date.
-  const errors: ValidationErrors<TModel, TMessage> =
-    validationCallback?.(model) ?? {};
-  const isValid = Object.values(errors).every(
-    (message) => message === undefined,
+  const resetModel = React.useCallback(() => {
+    setModel(initial);
+  }, [initial]);
+
+  // Deep comparison, so memoized.
+  const isModified = React.useMemo(
+    () => !isEqual(model, initial),
+    [model, initial],
   );
 
-  return { model, updateModel, errors, isValid };
+  const isValid = validationCallback ? validationCallback(model) : true;
+
+  return { model, updateModel, resetModel, isValid, isModified };
 };

@@ -1,12 +1,14 @@
+import type { AxiosResponse } from "axios";
+import { axiosClient } from "src/lib/api/axiosClient";
 import { ApiError } from "src/lib/api/types/ApiError";
 import type { ApiRequestOptions } from "src/lib/api/types/ApiRequestOptions";
 
 /*
- * Small fetch wrapper for the FamilyHub API. Authentication is carried by HttpOnly cookies
- * that the browser sends itself; this module never sees a token.
+ * Small wrapper around the axios client for the FamilyHub API. Authentication is carried by
+ * HttpOnly cookies that the browser sends itself; this module never sees a token.
  */
 
-const refreshEndpoint = "/api/Authentication/Refresh";
+const refreshEndpoint = "/Authentication/Refresh";
 
 let refreshPromise: Promise<boolean> | null = null;
 let sessionExpiredHandler: (() => void) | null = null;
@@ -18,16 +20,17 @@ export const setSessionExpiredHandler = (
   sessionExpiredHandler = handler;
 };
 
+const isSuccessStatus = (status: number): boolean =>
+  status >= 200 && status < 300;
+
 /**
  * Renews the access token cookie through the refresh token cookie. Parallel callers share one
  * request, because the refresh token is rotated and a second refresh with the old cookie would fail.
  */
 const refreshSession = (): Promise<boolean> => {
-  refreshPromise ??= fetch(refreshEndpoint, {
-    method: "POST",
-    credentials: "same-origin",
-  })
-    .then((response) => response.ok)
+  refreshPromise ??= axiosClient
+    .post(refreshEndpoint)
+    .then((response) => isSuccessStatus(response.status))
     .catch(() => false)
     .finally(() => {
       refreshPromise = null;
@@ -36,47 +39,41 @@ const refreshSession = (): Promise<boolean> => {
   return refreshPromise;
 };
 
-const readBody = async (response: Response): Promise<unknown> => {
-  const text = await response.text();
-  if (!text) {
-    return undefined;
-  }
+const request = (
+  url: string,
+  { method, body, params }: ApiRequestOptions,
+): Promise<AxiosResponse<unknown>> =>
+  axiosClient.request<unknown>({ url, method, data: body, params });
 
-  try {
-    return JSON.parse(text) as unknown;
-  } catch {
-    return text;
-  }
-};
-
-/** Sends a request and returns the parsed body. Throws ApiError for error statuses. */
-export const apiRequest = async (
+/**
+ * Sends a request and returns the response for a success status. On a 401 it refreshes the session
+ * once and retries; if the refresh fails, the session-expired handler runs. Throws ApiError for
+ * every non-success status.
+ */
+export const sendRequest = async (
   url: string,
   options: ApiRequestOptions,
-): Promise<unknown> => {
-  const { method, body, refreshOnUnauthorized = true } = options;
+): Promise<AxiosResponse<unknown>> => {
+  const { refreshOnUnauthorized = true } = options;
 
-  const response = await fetch(url, {
-    method,
-    credentials: "same-origin",
-    headers:
-      body === undefined ? undefined : { "Content-Type": "application/json" },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
+  let response = await request(url, options);
 
   if (response.status === 401 && refreshOnUnauthorized) {
     if (await refreshSession()) {
-      return apiRequest(url, { ...options, refreshOnUnauthorized: false });
+      response = await request(url, options);
+    } else {
+      sessionExpiredHandler?.();
     }
-
-    sessionExpiredHandler?.();
   }
 
-  const responseBody = await readBody(response);
-
-  if (!response.ok) {
-    throw new ApiError(response.status, responseBody);
+  // axios returns an empty string for an empty body.
+  if (response.data === "") {
+    response.data = undefined;
   }
 
-  return responseBody;
+  if (!isSuccessStatus(response.status)) {
+    throw new ApiError(response.status, response.data);
+  }
+
+  return response;
 };

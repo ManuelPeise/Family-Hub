@@ -11,13 +11,14 @@ import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
 import MuiTypography from "@mui/material/Typography";
-import type React from "react";
+import React from "react";
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { LogoutIcon, MenuIcon } from "src/components/layout/icons";
 import type { NavItem } from "src/components/layout/types/NavItem";
+import NotificationContainer from "src/components/layout/Notification";
 
-interface Props {
+interface IProps {
   appName: string;
   userName: string;
   navItems: NavItem[];
@@ -30,7 +31,7 @@ interface Props {
 }
 
 /** Frame for all pages after login: app bar on top, navigation in a drawer behind the menu button. */
-const AppShell: React.FC<Props> = ({
+const AppShell: React.FC<IProps> = ({
   appName,
   userName,
   navItems,
@@ -41,8 +42,8 @@ const AppShell: React.FC<Props> = ({
   onLogout,
   children,
 }) => {
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const { pathname } = useLocation();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
     <Box
@@ -98,6 +99,9 @@ const AppShell: React.FC<Props> = ({
             >
               {userName}
             </MuiTypography>
+
+            <NotificationContainer />
+
             <Tooltip title={logoutLabel}>
               <span>
                 <IconButton
