@@ -1,31 +1,29 @@
 import MuiButton from "@mui/material/Button";
 import type React from "react";
+import CircularProgress from "@mui/material/CircularProgress";
+import { useLoadingState } from "src/hooks/useLoadingState";
 
 interface Props {
   label: string;
-  /** Shown while the form is submitting. */
-  loadingLabel: string;
-  loading: boolean;
-  disabled?: boolean;
+  disabled: boolean;
   size?: "small" | "medium" | "large";
 }
 
-/** Full-width primary action of a form. Disabled while submitting to prevent double submission. */
-const SubmitButton: React.FC<Props> = ({
-  label,
-  loadingLabel,
-  loading,
-  disabled,
-  size,
-}) => {
+const ButtonLoadingIndicator: React.FC = () => {
+  return <CircularProgress size={12} color="inherit" />;
+};
+
+const SubmitButton: React.FC<Props> = ({ label, disabled, size }) => {
+  const { isLoading } = useLoadingState();
+
   return (
     <MuiButton
       size={size}
       type="submit"
       variant="contained"
-      disabled={loading || disabled}
+      disabled={disabled || isLoading}
     >
-      {loading ? loadingLabel : label}
+      {isLoading ? <ButtonLoadingIndicator /> : label}
     </MuiButton>
   );
 };

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Database.Migrations
 {
     [DbContext(typeof(FamilyHubDbContext))]
-    [Migration("20260928061505_InitializeDatabase")]
+    [Migration("20260928175334_InitializeDatabase")]
     partial class InitializeDatabase
     {
         /// <inheritdoc />
@@ -363,11 +363,6 @@ namespace Data.Database.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("MessageResourceKey")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
 
                     b.Property<int>("NotificationType")
                         .HasColumnType("int");

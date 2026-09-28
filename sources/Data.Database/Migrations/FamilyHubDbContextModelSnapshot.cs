@@ -361,11 +361,6 @@ namespace Data.Database.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("MessageResourceKey")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
-
                     b.Property<int>("NotificationType")
                         .HasColumnType("int");
 

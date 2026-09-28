@@ -4,7 +4,7 @@ import Stack from "@mui/material/Stack";
 import MuiTypography from "@mui/material/Typography";
 import type React from "react";
 import { Link as RouterLink } from "react-router-dom";
-import imageBackground from "src/components/layout/imageBackground";
+import imageBackground from "src/lib/utils/imageBackground";
 
 interface Props {
   /** URL of the background photo (imported asset). */

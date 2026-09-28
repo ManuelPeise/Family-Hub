@@ -1,21 +1,20 @@
 import React from "react";
-import { useTranslation } from "react-i18next";
 import backgroundImage from "src/assets/schottland.jpg";
 import LandingHero from "src/components/layout/LandingHero";
+import { useLocalization } from "src/hooks/useLocalization";
 
 const LandingPage: React.FC = () => {
-  const { t } = useTranslation("landing");
-  const { t: tCommon } = useTranslation();
+  const { getResource } = useLocalization();
 
   return (
     <LandingHero
       backgroundImage={backgroundImage}
-      appName={tCommon("labelAppName")}
-      title={t("title")}
-      subtitle={t("subtitle")}
-      primaryLabel={t("buttonRegister")}
+      appName={getResource("common:labelAppName")}
+      title={getResource("common:captionAppTitle")}
+      subtitle={getResource("common:labelAppSubTitle")}
+      primaryLabel={getResource("common:labelRequestAccess")}
       primaryTo="/register"
-      secondaryLabel={t("buttonLogin")}
+      secondaryLabel={getResource("common:labelLogin")}
       secondaryTo="/login"
     />
   );

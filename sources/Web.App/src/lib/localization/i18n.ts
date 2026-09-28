@@ -2,29 +2,21 @@ import i18n from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
 import type { Language } from "src/hooks/types/UseLocalisationResult";
-import authDe from "src/lib/localization/resources/de/auth.de.json";
 import commonDe from "src/lib/localization/resources/de/common.de.json";
-import homeDe from "src/lib/localization/resources/de/home.de.json";
-import landingDe from "src/lib/localization/resources/de/landing.de.json";
-import authEn from "src/lib/localization/resources/en/auth.en.json";
 import commonEn from "src/lib/localization/resources/en/common.en.json";
-import homeEn from "src/lib/localization/resources/en/home.en.json";
-import landingEn from "src/lib/localization/resources/en/landing.en.json";
+import notificationDe from "src/lib/localization/resources/de/notification.de.json";
+import notificationEn from "src/lib/localization/resources/en/notification.en.json";
 
 export const defaultNS = "common";
 
 export const resources = {
   de: {
     common: commonDe,
-    auth: authDe,
-    landing: landingDe,
-    home: homeDe,
+    notification: notificationDe,
   },
   en: {
     common: commonEn,
-    auth: authEn,
-    landing: landingEn,
-    home: homeEn,
+    notification: notificationEn,
   },
 } as const;
 

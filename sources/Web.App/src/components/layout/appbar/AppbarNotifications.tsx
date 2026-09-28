@@ -3,8 +3,7 @@ import type { NotificationModel } from "src/components/layout/types/Notification
 import { StatelessApiClient } from "src/lib/api/StatelessApi";
 import { useComponentInitializationAsync } from "src/hooks/useComponentInitializationAsync";
 import { IconButton, Menu, MenuItem, Typography } from "@mui/material";
-import { NotificationsIcon } from "src/components/layout/icons";
-import isNotificationModelList from "src/components/layout/isNotificationModelList";
+import { NotificationsIcon } from "src/lib/utils/icons";
 
 interface INotificationInitializationProps {
   notificationModels: NotificationModel[];
@@ -16,7 +15,6 @@ interface INotificationInitializationProps {
 
 interface INotificationModelState {
   notificationModels: NotificationModel[];
-  isNotificationMenuOpen: boolean;
 }
 
 const initializeAsync = async (): Promise<INotificationInitializationProps> => {
@@ -25,10 +23,11 @@ const initializeAsync = async (): Promise<INotificationInitializationProps> => {
     NotificationModel[]
   >({
     url: "/UserNotification/GetUserNotifications",
-    isResponse: isNotificationModelList,
+    isResponse: (response: unknown): response is NotificationModel[] =>
+      Array.isArray(response),
   });
 
-  const [notifications] = await Promise.all([notificationApi.sendGet()]);
+  const [notifications] = await Promise.all([await notificationApi.sendGet()]);
 
   const updateNotification = async (
     notification: NotificationModel,
@@ -47,11 +46,13 @@ const initializeAsync = async (): Promise<INotificationInitializationProps> => {
   };
 };
 
-const NotificationContainer: React.FC = () => {
+const AppbarNotificationContainer: React.FC = () => {
   const initialization =
     useComponentInitializationAsync<INotificationInitializationProps>(
       initializeAsync,
     );
+
+  console.log(initialization.model?.notificationModels);
 
   if (
     !initialization.initialized ||
@@ -61,19 +62,22 @@ const NotificationContainer: React.FC = () => {
   }
 
   return (
-    <Notification
+    <AppbarNotification
       notificationModels={initialization.model.notificationModels}
       updateNotification={initialization.model.updateNotification}
     />
   );
 };
 
-const Notification: React.FC<INotificationInitializationProps> = (props) => {
+const AppbarNotification: React.FC<INotificationInitializationProps> = (
+  props,
+) => {
   const { notificationModels, updateNotification } = props;
+
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const [state, setState] = React.useState<INotificationModelState>({
     notificationModels: notificationModels,
-    isNotificationMenuOpen: false,
   });
 
   const handleUpdateNotificationState = React.useCallback(
@@ -90,33 +94,45 @@ const Notification: React.FC<INotificationInitializationProps> = (props) => {
       <IconButton
         color="inherit"
         disabled={!state.notificationModels.length}
-        onClick={() => {
-          handleUpdateNotificationState(state.notificationModels);
+        onClick={(event) => {
+          setAnchorEl(anchorEl ? null : event.currentTarget);
         }}
       >
         <NotificationsIcon />
       </IconButton>
       <Menu
-        anchorEl={state.isNotificationMenuOpen ? document.body : null}
-        open={state.isNotificationMenuOpen}
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
         onClose={() => {
-          handleUpdateNotificationState(state.notificationModels);
+          setAnchorEl(null);
+        }}
+        slotProps={{
+          paper: {
+            sx: {
+              minWidth: 200,
+              borderRadius: 0,
+              padding: 0,
+              margin: 0,
+            },
+          },
         }}
       >
         {state.notificationModels.map((item) => (
           <MenuItem
             key={item.id}
             onClick={() => {
-              void updateNotification(
+              updateNotification(
                 {
                   ...item,
                   isActive: false,
                 },
                 handleUpdateNotificationState,
               );
+
+              setAnchorEl(null);
             }}
           >
-            <Typography variant="body2">{item.messageResourceKey}</Typography>
+            <Typography variant="body2">{item.notification}</Typography>
           </MenuItem>
         ))}
       </Menu>
@@ -124,4 +140,4 @@ const Notification: React.FC<INotificationInitializationProps> = (props) => {
   );
 };
 
-export default NotificationContainer;
+export default AppbarNotificationContainer;

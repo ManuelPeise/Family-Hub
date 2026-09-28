@@ -76,7 +76,6 @@ namespace Logic.Administration.Family
 
                     var notificationEntities = adminUsers.Select(adminUser => new UserNotificationEntity
                     {
-                        MessageResourceKey = FamilyMemberRequestNotificationResourceKey,
                         NotificationType = NotificationTypeEnum.FamilyMemberRequest,
                         UserId = adminUser.Id,
                         IsActive = true,

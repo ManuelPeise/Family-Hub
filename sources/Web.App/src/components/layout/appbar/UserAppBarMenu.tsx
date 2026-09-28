@@ -3,7 +3,7 @@ import { useLocalization } from "src/hooks/useLocalization";
 import { Menu, Box, Avatar, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import useAuthenticationState from "src/hooks/useAuthenticationState";
-import UserMenuItem from "src/components/user/UserMenuItem";
+import UserMenuItem from "src/components/layout/appbar/UserMenuItem";
 
 export type MenuItemType = {
   key: string;
@@ -34,7 +34,7 @@ const UserAppBarMenu: React.FC = () => {
     return [
       {
         key: "profile",
-        label: localization.getResource("auth:labelProfile"),
+        label: localization.getResource("common:labelProfile"),
         onClick: async () => {
           await navigate("/user/profile");
           handleMenuClose();
@@ -42,7 +42,7 @@ const UserAppBarMenu: React.FC = () => {
       },
       {
         key: "logout",
-        label: localization.getResource("auth:labelLogout"),
+        label: localization.getResource("common:labelLogout"),
         onClick: handleLogout,
       },
     ];

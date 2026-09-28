@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import Typography from "src/components/layout/Typography";
+import Typography from "src/components/labels/Typography";
 import useAuthenticationState from "src/hooks/useAuthenticationState";
 
 /** Start page after login. The app bar and drawer come from the AuthenticatedLayout. */

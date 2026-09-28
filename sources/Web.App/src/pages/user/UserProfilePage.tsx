@@ -16,7 +16,7 @@ import {
   type LanguageTypeEnum,
 } from "src/lib/enums/LanguageTypeEnum";
 import FormSelect from "src/components/form/FormSelect";
-import Typography from "src/components/layout/Typography";
+import Typography from "src/components/labels/Typography";
 import SubmitButton from "src/components/form/SubmitButton";
 import FormCancelButton from "src/components/form/FormCancelButton";
 import type { Language } from "src/hooks/types/UseLocalisationResult";
@@ -68,7 +68,7 @@ const UserProfileContainer: React.FC = () => {
 
 const UserProfilePage: React.FC<UserProfileInitializationProps> = (props) => {
   const { profileModel, handleUpdateProfile } = props;
-  const { isLoading, handleIsLoadingChanged } = useLoadingState();
+  const { handleIsLoadingChanged } = useLoadingState();
   const localization = useLocalization();
   const { selectLanguage } = localization;
   const [changePasswordDialogOpen, setChangePasswordDialogOpen] =
@@ -83,10 +83,17 @@ const UserProfilePage: React.FC<UserProfileInitializationProps> = (props) => {
       const response = await handleUpdateProfile(model);
 
       commitModel(response);
+      resetModel();
     } finally {
       handleIsLoadingChanged(false);
     }
-  }, [model, handleUpdateProfile, commitModel, handleIsLoadingChanged]);
+  }, [
+    model,
+    handleUpdateProfile,
+    commitModel,
+    handleIsLoadingChanged,
+    resetModel,
+  ]);
 
   const handleChangeLanguage = React.useCallback(
     (value: number) => {
@@ -200,8 +207,6 @@ const UserProfilePage: React.FC<UserProfileInitializationProps> = (props) => {
             label={localization.getResource("common:labelSave")}
             size="small"
             disabled={!isModified}
-            loadingLabel={localization.getResource("common:labelLoading")}
-            loading={isLoading}
           />
         </Box>
       </Form>
