@@ -1,6 +1,7 @@
 import React from "react";
 import { useLocalization } from "src/hooks/useLocalization";
 import { Menu, Box, Avatar, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import useAuthenticationState from "src/hooks/useAuthenticationState";
 import UserMenuItem from "src/components/user/UserMenuItem";
 
@@ -13,6 +14,7 @@ export type MenuItemType = {
 const UserAppBarMenu: React.FC = () => {
   const localization = useLocalization();
   const authenticationState = useAuthenticationState();
+  const navigate = useNavigate();
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
@@ -34,6 +36,7 @@ const UserAppBarMenu: React.FC = () => {
         key: "profile",
         label: localization.getResource("auth:labelProfile"),
         onClick: async () => {
+          await navigate("/user/profile");
           handleMenuClose();
         },
       },
@@ -43,7 +46,7 @@ const UserAppBarMenu: React.FC = () => {
         onClick: handleLogout,
       },
     ];
-  }, [localization, handleLogout]);
+  }, [localization, handleLogout, navigate]);
 
   return (
     <Box>

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Database.Migrations
 {
     [DbContext(typeof(FamilyHubDbContext))]
-    [Migration("20260926090208_InitializeDatabase")]
+    [Migration("20260928061505_InitializeDatabase")]
     partial class InitializeDatabase
     {
         /// <inheritdoc />
@@ -262,6 +262,9 @@ namespace Data.Database.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
 
+                    b.Property<bool>("IsOnTimePassword")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<DateTime>("PasswordExpiresAt")
                         .HasColumnType("datetime(6)");
 
@@ -313,6 +316,9 @@ namespace Data.Database.Migrations
                     b.Property<string>("FirstName")
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
+
+                    b.Property<int>("Language")
+                        .HasColumnType("int");
 
                     b.Property<string>("LastName")
                         .HasMaxLength(100)

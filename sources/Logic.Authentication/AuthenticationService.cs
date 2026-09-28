@@ -38,8 +38,10 @@ namespace Logic.Authentication
                 ArgumentException.ThrowIfNullOrEmpty(request.Password, nameof(request.Password));
 
                 var identityUnitOfWork = _applicationUnitOfWork.IdentityUnitOfWork;
+                
                 var userEntity = QueryUsersWithTokenClaims(identityUnitOfWork)
                     .Include(u => u.Credentials)
+                    .Include(u => u.RefreshToken)
                     .FirstOrDefault(u => u.UserName == request.UserNameOrEmail || u.Email == request.UserNameOrEmail);
 
                 if (userEntity == null || userEntity.Credentials == null)
@@ -56,6 +58,7 @@ namespace Logic.Authentication
                 var refreshToken = _tokenService.CreateRefreshToken();
 
                 StoreRefreshToken(userEntity, _tokenService.HashRefreshToken(refreshToken.Value), refreshToken.ExpiresAt);
+
                 await identityUnitOfWork.SaveChangesAsync(cancellationToken);
 
                 return new TokenResponse

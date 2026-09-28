@@ -7,6 +7,7 @@ import HomePage from "src/pages/home/HomePage";
 import LandingPage from "src/pages/landing/LandingPage";
 import LoginPage from "src/pages/Authentication/login/LoginPage";
 import RegisterPage from "src/pages/Authentication/requestAccount/RequestAccountPage";
+import UserProfileContainer from "src/pages/user/UserProfilePage";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -22,6 +23,7 @@ const AppRoutes: React.FC = () => {
       <Route element={<ProtectedRoute />}>
         <Route element={<AuthenticatedLayout />}>
           <Route path="/home" element={<HomePage />} />
+          <Route path="/user/profile" element={<UserProfileContainer />} />
         </Route>
       </Route>
 

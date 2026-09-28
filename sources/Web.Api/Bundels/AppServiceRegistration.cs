@@ -11,6 +11,7 @@ using Web.Api.Service.OpenApi;
 using Logic.Shared.DI;
 using Data.Database.Context;
 using Logic.Administration.DI;
+using Logic.UserService.DI;
 
 namespace Web.Api.Bundels
 {
@@ -36,6 +37,7 @@ namespace Web.Api.Bundels
             services.AddAuthenticationServices();
             services.AddSharedServices();
             services.AddAdministrationServices();
+            services.RegisterUserServices();
 
             services.AddCorsServices();
 
