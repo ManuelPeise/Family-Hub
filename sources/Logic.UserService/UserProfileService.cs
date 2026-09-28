@@ -30,11 +30,13 @@ namespace Logic.UserService
                     .Where(u => u.Id == CurrentUser.UserId)
                     .Select(u => new UserProfileModel
                     {
+                        Id = u.Id,
                         FirstName = u.FirstName,
                         LastName = u.LastName,
                         UserName = u.UserName,
                         Email = u.Email,
-                        DateOfBirth = u.DateOfBirth
+                        DateOfBirth = u.DateOfBirth,
+                        Language = u.Language
                     })
                     .FirstOrDefault();
 
@@ -52,28 +54,28 @@ namespace Logic.UserService
         {
             try
             {
-                var userEntity = _applicationUnitOfWork.IdentityUnitOfWork.UserRepository.Query()
-                    .Where(u => u.Id == CurrentUser.UserId)
-                    .FirstOrDefault();
+                var currentUserId = CurrentUser.UserId;
 
+                var userEntity = await _applicationUnitOfWork.IdentityUnitOfWork.UserRepository.GetByIdAsync(currentUserId);
+                 
                 if (userEntity != null)
                 {
                     userEntity.FirstName = profile.FirstName;
                     userEntity.LastName = profile.LastName;
-                    userEntity.UserName = profile.UserName;
-                    userEntity.Email = profile.Email;
                     userEntity.DateOfBirth = profile.DateOfBirth;
+                    userEntity.Language = profile.Language;
 
-                    _applicationUnitOfWork.IdentityUnitOfWork.UserRepository.Update(userEntity);
                     await _applicationUnitOfWork.IdentityUnitOfWork.SaveChangesAsync();
 
                     return new UserProfileModel
                     {
+                        Id = userEntity.Id,
                         FirstName = userEntity.FirstName,
                         LastName = userEntity.LastName,
                         UserName = userEntity.UserName,
                         Email = userEntity.Email,
-                        DateOfBirth = userEntity.DateOfBirth
+                        DateOfBirth = userEntity.DateOfBirth,
+                        Language = userEntity.Language,
                     };
                 }
 
@@ -105,14 +107,14 @@ namespace Logic.UserService
                 {
                     var passwordHasher = new PasswordHasher();
 
-                    if (!passwordHasher.VerifyPassword(userEntity.Credentials.PasswordHash, credentialsUpdate.CurrentPassword))
+                    if (!passwordHasher.VerifyPassword(credentialsUpdate.CurrentPassword, userEntity.Credentials.PasswordHash))
                     {
                         throw new Exception("Current password is incorrect.");
                     }
 
                     userEntity.Credentials.PasswordHash = passwordHasher.HashPassword(credentialsUpdate.NewPassword);
-
-                    _applicationUnitOfWork.IdentityUnitOfWork.UserRepository.Update(userEntity);
+                    userEntity.Credentials.IsOnTimePassword = false;
+                    userEntity.Credentials.PasswordExpiresAt = DateTime.UtcNow.AddDays(90);
 
                     await _applicationUnitOfWork.IdentityUnitOfWork.SaveChangesAsync();
 

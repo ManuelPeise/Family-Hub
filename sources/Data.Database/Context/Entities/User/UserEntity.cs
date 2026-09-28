@@ -1,4 +1,6 @@
-﻿namespace Data.Database.Context.Entities.User
+﻿using Shared.Enums.User;
+
+namespace Data.Database.Context.Entities.User
 {
     public class UserEntity: AEntityBase
     {
@@ -7,6 +9,7 @@
         public string Email { get; set; } = null!;
         public string UserName { get; set; } = null!;
         public DateTime DateOfBirth { get; set; }
+        public LanguageTypeEnum Language { get; set; } = LanguageTypeEnum.English;
         // The credential rows hold the UserId foreign key and are deleted with the user
         public UserCredentialsEntity Credentials { get; set; } = null!;
         public UserRefreshTokenEntity? RefreshToken { get; set; }

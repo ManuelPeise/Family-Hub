@@ -8,11 +8,12 @@ interface IProps {
   autoComplete?: string;
   required?: boolean;
   error?: string;
+  disabled?: boolean;
   onChange: (value: string) => void;
 }
 
 const FormTextField: React.FC<IProps> = (props) => {
-  const { label, value, onChange, error, type, autoComplete } = props;
+  const { label, value, onChange, error, type, autoComplete, disabled } = props;
 
   const handleChange = React.useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,6 +33,7 @@ const FormTextField: React.FC<IProps> = (props) => {
       helperText={error}
       type={type ?? "text"}
       fullWidth
+      disabled={disabled}
     />
   );
 };

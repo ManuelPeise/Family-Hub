@@ -6,6 +6,7 @@ namespace Data.Database.Context.Entities.User
     {
         public string PasswordHash { get; set; } = null!;
         public DateTime PasswordExpiresAt { get; set; }
+        public bool IsOnTimePassword { get; set; }
 
         public long UserId { get; set; }
         [ForeignKey(nameof(UserId))]
