@@ -1,6 +1,6 @@
 import React from "react";
 import { MenuItem } from "@mui/material";
-import type { MenuItemType } from "src/components/user/UserAppBarMenu";
+import type { MenuItemType } from "src/components/layout/appbar/UserAppBarMenu";
 
 const UserMenuItem: React.FC<MenuItemType> = (props) => {
   const { label, onClick } = props;

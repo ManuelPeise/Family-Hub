@@ -6,6 +6,7 @@ import { useFormModel } from "src/hooks/useFormModel";
 import { useLocalization } from "src/hooks/useLocalization";
 import useAuthenticationState from "src/hooks/useAuthenticationState";
 import type { AuthenticationRequest } from "src/lib/authentication/types/Authentication.types";
+import { useLoadingState } from "src/hooks/useLoadingState";
 
 const initialModel: AuthenticationRequest = {
   userNameOrEmail: "",
@@ -15,16 +16,25 @@ const initialModel: AuthenticationRequest = {
 const LoginForm: React.FC = () => {
   const { getResource } = useLocalization();
   const authenticationState = useAuthenticationState();
+  const { handleIsLoadingChanged } = useLoadingState();
+
   const { model, isModified, isValid, updateModel } =
     useFormModel<AuthenticationRequest>(initialModel);
 
   const handleSubmit = React.useCallback(async () => {
-    await authenticationState.handleLogin(model);
-  }, [authenticationState, model]);
+    try {
+      handleIsLoadingChanged(true);
+
+      await authenticationState.handleLogin(model);
+    } finally {
+      handleIsLoadingChanged(false);
+    }
+  }, [authenticationState, model, handleIsLoadingChanged]);
+
   return (
     <Form onSubmit={handleSubmit}>
       <FormTextField
-        label={getResource("auth:labelUserNameOrEmail")}
+        label={getResource("common:labelUserNameOrEmail")}
         autoComplete="username"
         type="text"
         required
@@ -35,7 +45,7 @@ const LoginForm: React.FC = () => {
       />
 
       <FormTextField
-        label={getResource("auth:labelPassword")}
+        label={getResource("common:labelPassword")}
         type="password"
         required
         value={model.password}
@@ -45,9 +55,8 @@ const LoginForm: React.FC = () => {
       />
 
       <SubmitButton
-        label={getResource("auth:buttonLogin")}
-        loadingLabel={getResource("auth:buttonLoginLoading")}
-        loading={!isValid || !isModified}
+        label={getResource("common:labelLogin")}
+        disabled={!isValid || !isModified}
       />
     </Form>
   );

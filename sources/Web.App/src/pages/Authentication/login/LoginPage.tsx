@@ -1,23 +1,24 @@
 import React from "react";
-import { useTranslation } from "react-i18next";
 import backgroundImage from "src/assets/schottland.jpg";
 import AuthLayout from "src/components/layout/AuthLayout";
 import Link from "src/components/layout/Link";
-import Typography from "src/components/layout/Typography";
+import Typography from "src/components/labels/Typography";
 import LoginForm from "src/pages/Authentication/login/LoginForm";
+import { useLocalization } from "src/hooks/useLocalization";
 
 const LoginPage: React.FC = () => {
-  const { t } = useTranslation("auth");
+  const { getResource } = useLocalization();
 
   return (
     <AuthLayout
       backgroundImage={backgroundImage}
-      title={t("titleLogin")}
-      backLabel={t("labelBackToStart")}
+      title={getResource("common:captionLogin")}
+      backLabel={getResource("common:labelBackToStart")}
       backTo="/"
       footer={
         <Typography>
-          {t("textNoAccount")} <Link to="/register">{t("linkRegister")}</Link>
+          {getResource("common:labelNoAccount")}{" "}
+          <Link to="/register">{getResource("common:labelRegister")}</Link>
         </Typography>
       }
     >

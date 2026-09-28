@@ -8,8 +8,8 @@ interface Props {
 }
 
 /** Stacks its children vertically with a consistent gap. */
-const Stack: React.FC<Props> = ({ children, spacing = 2 }) => {
+const StackContainer: React.FC<Props> = ({ children, spacing = 2 }) => {
   return <MuiStack spacing={spacing}>{children}</MuiStack>;
 };
 
-export default Stack;
+export default StackContainer;

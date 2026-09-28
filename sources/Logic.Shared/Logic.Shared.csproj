@@ -17,6 +17,7 @@
     <ProjectReference Include="..\Data.Accessor\Data.Accessor.csproj" />
     <ProjectReference Include="..\Shared.Enums\Shared.Enums.csproj" />
     <ProjectReference Include="..\Shared.Models\Shared.Models.csproj" />
+    <ProjectReference Include="..\Shared.Resources\Shared.Resources.csproj" />
   </ItemGroup>
 
 </Project>

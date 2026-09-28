@@ -6,7 +6,7 @@ namespace Shared.Models.Notifications
     {
         public long Id { get; set; }
         public NotificationTypeEnum NotificationType { get; set; }
-        public string MessageResourceKey { get; set; } = null!;
+        public string Notification { get; set; } = null!;
         public bool IsActive { get; set; }
     }
 }

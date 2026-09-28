@@ -213,7 +213,6 @@ namespace Data.Database.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     NotificationType = table.Column<int>(type: "int", nullable: false),
-                    MessageResourceKey = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     UserId = table.Column<long>(type: "bigint", nullable: false),
                     CreatedBy = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false),

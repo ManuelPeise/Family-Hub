@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import AppShellContainer from "src/components/layout/AppShell";
-import { HomeIcon } from "src/components/layout/icons";
+import { HomeIcon } from "src/lib/utils/icons";
 
 import { useLocalization } from "src/hooks/useLocalization";
 

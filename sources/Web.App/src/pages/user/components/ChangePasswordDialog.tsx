@@ -9,7 +9,7 @@ import SubmitButton from "src/components/form/SubmitButton";
 import { useLocalization } from "src/hooks/useLocalization";
 import { useLoadingState } from "src/hooks/useLoadingState";
 import { StatelessApiClient } from "src/lib/api/StatelessApi";
-import Typography from "src/components/layout/Typography";
+import Typography from "src/components/labels/Typography";
 
 interface ChangePasswordDialogProps {
   open: boolean;
@@ -35,7 +35,7 @@ const validateChangePasswordModel = (
 const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = (props) => {
   const { open, onClose } = props;
   const { getResource } = useLocalization();
-  const { isLoading, handleIsLoadingChanged } = useLoadingState();
+  const { handleIsLoadingChanged } = useLoadingState();
   const [error, setError] = React.useState<string | null>(null);
 
   const { model, updateModel, isModified, isValid, resetModel } =
@@ -147,8 +147,6 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = (props) => {
                 label={getResource("common:labelChange")}
                 size="small"
                 disabled={!isModified || !isValid}
-                loading={isLoading}
-                loadingLabel={getResource("common:labelLoading")}
               />
             </Box>
           </Form>

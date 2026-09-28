@@ -7,7 +7,7 @@ interface Props {
   label: string;
 }
 
-const FullPageLoader: React.FC<Props> = ({ label }) => {
+const LoadingOverlay: React.FC<Props> = ({ label }) => {
   return (
     <Box
       role="status"
@@ -24,4 +24,4 @@ const FullPageLoader: React.FC<Props> = ({ label }) => {
   );
 };
 
-export default FullPageLoader;
+export default LoadingOverlay;

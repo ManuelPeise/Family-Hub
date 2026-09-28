@@ -1,9 +1,12 @@
 ﻿using Data.Accessor.Interfaces;
-using Data.Database.Context.Entities.User;
 using Logic.Shared.Interfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Shared.Enums.Notifications;
+using Shared.Enums.User;
 using Shared.Models.Notifications;
+using System.Globalization;
 
 namespace Logic.Shared
 {
@@ -25,11 +28,46 @@ namespace Logic.Shared
         {
             try
             {
-                var notificationEntities = _applicationUnitOfWork.IdentityUnitOfWork.NotificationRepository.Query()
-                    .Where(n => n.UserId == CurrentUser.UserId)
-                    .ToList();
+                var userEntity = _applicationUnitOfWork.IdentityUnitOfWork.UserRepository.Query()
+                    .Include(u => u.Notifications)
+                    .FirstOrDefault(u => u.Id == CurrentUser.UserId);
 
-                return MapToExportModel(notificationEntities.ToList());
+                if (userEntity == null)
+                {
+                    _logger.LogWarning("User not found for userId: {UserId}", CurrentUser.UserId);
+                    return new List<NotificationExportModel>();
+                }
+
+                var culture = userEntity.Language == LanguageTypeEnum.English ? "en-US" : "de-DE";
+
+                // Set the current thread's culture to the user's preferred language
+                Thread.CurrentThread.CurrentCulture = new CultureInfo(culture);
+
+                var notificationGroups = userEntity.Notifications
+                      .GroupBy(n => n.NotificationType)
+                      .ToList();
+
+                var notifications = new List<NotificationExportModel>();
+
+                foreach (var group in notificationGroups)
+                {
+                    if (!group.Any(x => x.IsActive))
+                    {
+                        continue;
+                    }
+
+                    var notificationExportModel = new NotificationExportModel
+                    {
+                        Id = group.First().Id,
+                        NotificationType = group.Key,
+                        Notification = GetNotificationMessage(group.Key, group.Count(x => x.IsActive)),
+                        IsActive = group.First().IsActive
+                    };
+
+                    notifications.Add(notificationExportModel);
+                }
+
+                return notifications;
             }
             catch (Exception exception)
             {
@@ -39,52 +77,60 @@ namespace Logic.Shared
             }
         }
 
+
+
         public async Task<List<NotificationExportModel>> UpdateUserNotificationsAsync(NotificationExportModel notification)
         {
             try
             {
-                var notificationEntities = _applicationUnitOfWork.IdentityUnitOfWork.NotificationRepository.Query()
-                    .Where(n => n.UserId == CurrentUser.UserId)
-                    .ToList();
+                var userEntity = _applicationUnitOfWork.IdentityUnitOfWork.UserRepository.Query()
+                    .Include(u => u.Notifications)
+                    .FirstOrDefault(u => u.Id == CurrentUser.UserId);
 
-                if (!notificationEntities.Any())
+                if (userEntity == null)
                 {
-                    return MapToExportModel(new List<UserNotificationEntity>());
+                    _logger.LogWarning("User not found for userId: {UserId}", CurrentUser.UserId);
+
+                    return await GetUserNotificationsAsync();
                 }
 
-                var notificationIndex = notificationEntities.FindIndex(n => n.Id == notification.Id);
-                if (notificationIndex == -1)
+                var notifications = userEntity.Notifications.Where(n => n.NotificationType == notification.NotificationType).ToList();
+
+                if (!notifications.Any())
                 {
-                    return MapToExportModel(notificationEntities);
+                    _logger.LogWarning("No notifications found for notificationType: {NotificationType} and userId: {UserId}", notification.NotificationType, CurrentUser.UserId);
+
+                    return await GetUserNotificationsAsync();
                 }
 
-                notificationEntities[notificationIndex].IsActive = notification.IsActive;
-
-                _applicationUnitOfWork.IdentityUnitOfWork.NotificationRepository.Update(notificationEntities[notificationIndex]);
+                foreach (var notificationEntity in notifications)
+                {
+                    notificationEntity.IsActive = notification.IsActive;
+                    _applicationUnitOfWork.IdentityUnitOfWork.NotificationRepository.Update(notificationEntity);
+                }
 
                 await _applicationUnitOfWork.SaveChanges();
 
-                return MapToExportModel(notificationEntities);
+                return await GetUserNotificationsAsync();
+
             }
             catch (Exception exception)
             {
                 _logger.LogError(exception, "Error occurred while getting user notifications for userId: {UserId}", CurrentUser.UserId);
 
-                return MapToExportModel(new List<UserNotificationEntity>());
+                return await GetUserNotificationsAsync();
             }
         }
 
-        private List<NotificationExportModel> MapToExportModel(List<UserNotificationEntity> notificationEntities)
+        private string GetNotificationMessage(NotificationTypeEnum key, int v)
         {
-            var notificationExportModels = notificationEntities?.Select(n => new NotificationExportModel
+            switch (key)
             {
-                Id = n.Id,
-                NotificationType = n.NotificationType,
-                MessageResourceKey = n.MessageResourceKey,
-                IsActive = n.IsActive
-            }).ToList() ?? new List<NotificationExportModel>();
-
-            return notificationExportModels;
+                case NotificationTypeEnum.FamilyMemberRequest:
+                    return RESX.Notification.NotificationIncomingAccessRequest.Replace("{Count}", v.ToString());
+                default:
+                    return string.Empty;
+            }
         }
     }
 }

@@ -12,10 +12,10 @@ import MuiTypography from "@mui/material/Typography";
 import React from "react";
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { MenuIcon } from "src/components/layout/icons";
+import { MenuIcon } from "src/lib/utils/icons";
 import type { NavItem } from "src/components/layout/types/NavItem";
-import NotificationContainer from "src/components/layout/Notification";
-import UserAppBarMenu from "src/components/user/UserAppBarMenu";
+import NotificationContainer from "src/components/layout/appbar/AppbarNotifications";
+import UserAppBarMenu from "src/components/layout/appbar/UserAppBarMenu";
 
 interface IProps {
   appName: string;

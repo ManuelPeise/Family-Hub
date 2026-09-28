@@ -15,10 +15,6 @@ namespace Data.Database.Context.Configurations
 
             builder.ToTable(TableName);
 
-            builder.Property(n => n.MessageResourceKey)
-                   .HasMaxLength(ColumnLengths.ResourceKey)
-                   .IsRequired();
-
             // Serves the "active notifications of a user" lookup. UserId leads the index,
             // so it also serves the FK, and no separate UserId index is needed.
             builder.HasIndex(n => new { n.UserId, n.IsActive });

@@ -19,6 +19,7 @@
   <Folder Name="/4 Shared/">
     <Project Path="Shared.Enums/Shared.Enums.csproj" Id="e85ccef5-202e-486b-b90b-665940fc124a" />
     <Project Path="Shared.Models/Shared.Models.csproj" Id="1deb551e-dddd-42e3-a2a2-507d687abd83" />
+    <Project Path="Shared.Resources/Shared.Resources.csproj" Id="31170ef0-81b0-4afc-8839-90e3a61d239b" />
   </Folder>
   <Folder Name="/5 Tests/" />
 </Solution>
