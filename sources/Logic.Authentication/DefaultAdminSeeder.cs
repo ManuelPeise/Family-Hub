@@ -5,6 +5,7 @@ using Logic.Shared.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Shared.Enums.Auth;
+using Shared.Enums.Security;
 using Shared.Models.Options;
 
 namespace Logic.Authentication
@@ -55,6 +56,33 @@ namespace Logic.Authentication
             var adminRole = await identityUnitOfWork.RoleRepository.GetFirstOrDefaultAsync(r => r.RoleType == UserRoleEnum.Admin, cancellationToken: cancellationToken)
                 ?? throw new InvalidOperationException("The Admin role is missing. It is seeded by the Identity migrations.");
 
+            var adminUserScopes = new List<UserScopeEntity> {
+                new UserScopeEntity
+                {
+                    ScopeId = (long)ScopeTypeEnum.Administration,
+                    CanCreate = true,
+                    CanView = true,
+                    CanEdit = true,
+                    CanDelete = true,
+                },
+                new UserScopeEntity
+                {
+                    ScopeId = (long)ScopeTypeEnum.FamilyAdministration,
+                    CanCreate = true,
+                    CanView = true,
+                    CanEdit = true,
+                    CanDelete = true,
+                },
+                new UserScopeEntity
+                {
+                    ScopeId = (long)ScopeTypeEnum.UserAdministration,
+                    CanCreate = true,
+                    CanView = true,
+                    CanEdit = true,
+                    CanDelete = true,
+                }
+            };
+
             var admin = new UserEntity
             {
                 FirstName = _adminOptions.FirstName,
@@ -68,6 +96,7 @@ namespace Logic.Authentication
                     PasswordHash = _passwordHasher.HashPassword(_adminOptions.Password),
                     PasswordExpiresAt = DateTime.UtcNow.AddDays(PasswordLifetimeDays),
                 },
+                UserScopes = adminUserScopes,
             };
 
             await identityUnitOfWork.UserRepository.AddAsync(admin, cancellationToken);

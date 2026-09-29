@@ -1,8 +1,11 @@
 @echo off
-rem Pulls the latest images and recreates changed containers (data volumes are kept)
+rem Pulls the latest images, rebuilds the API and web app on fresh base images and recreates changed containers (data volumes are kept)
 cd /d "%~dp0"
 
-docker compose pull
+docker compose pull --ignore-buildable
+if errorlevel 1 goto :error
+
+docker compose build --pull
 if errorlevel 1 goto :error
 
 docker compose up -d --remove-orphans

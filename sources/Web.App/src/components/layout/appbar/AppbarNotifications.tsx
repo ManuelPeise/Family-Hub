@@ -27,7 +27,7 @@ const initializeAsync = async (): Promise<INotificationInitializationProps> => {
       Array.isArray(response),
   });
 
-  const [notifications] = await Promise.all([await notificationApi.sendGet()]);
+  const notifications = await notificationApi.sendGet();
 
   const updateNotification = async (
     notification: NotificationModel,
@@ -121,7 +121,7 @@ const AppbarNotification: React.FC<INotificationInitializationProps> = (
           <MenuItem
             key={item.id}
             onClick={() => {
-              updateNotification(
+              void updateNotification(
                 {
                   ...item,
                   isActive: false,

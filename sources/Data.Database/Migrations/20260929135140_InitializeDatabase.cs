@@ -321,7 +321,12 @@ namespace Data.Database.Migrations
             migrationBuilder.InsertData(
                 table: "Scopes",
                 columns: new[] { "Id", "CreatedAt", "CreatedBy", "Name", "ScopeType", "UpdatedAt", "UpdatedBy" },
-                values: new object[] { 1L, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "System", "Administration", 1, null, null });
+                values: new object[,]
+                {
+                    { 1L, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "System", "Administration", 1, null, null },
+                    { 2L, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "System", "Administration.FamilyAdministration", 2, null, null },
+                    { 3L, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "System", "Administration.UserAdministration", 3, null, null }
+                });
 
             migrationBuilder.InsertData(
                 table: "UserRoles",

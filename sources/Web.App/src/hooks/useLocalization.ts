@@ -7,7 +7,11 @@ import type {
   UseLocalisationResult,
 } from "src/hooks/types/UseLocalisationResult";
 
-const namespaces: ResourceNamespace[] = ["common", "auth", "landing", "home"];
+const namespaces: ResourceNamespace[] = [
+  "common",
+  "navigation",
+  "notification",
+];
 
 export const useLocalization = (): UseLocalisationResult => {
   const { t, i18n } = useTranslation(namespaces);

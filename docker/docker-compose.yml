@@ -45,6 +45,57 @@ services:
     volumes:
       - seq-data:/data
 
+  # The API reads its config from these variables: appsettings.development.json is not loaded on Linux
+  # (file names are case-sensitive there). Values mirror that file, with container host names.
+  api:
+    build:
+      context: ../sources
+      dockerfile: Web.Api/Dockerfile
+    container_name: familyhub-api
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+      seq:
+        condition: service_started
+    ports:
+      - "5080:8080"   # Swagger UI -> http://localhost:5080/swagger
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      TZ: Europe/Berlin
+      ConnectionStrings__FamilyHubContext: "host=mysql;Port=3306;Database=FamilyHubContextDb;User=DevUser;Password=DevPassword123!;"
+      Admin__FirstName: Super
+      Admin__LastName: Admin
+      Admin__Email: admin@example.com
+      Admin__UserName: admin
+      Admin__DateOfBirth: "1980-01-01"
+      Admin__Password: AdminPassword!
+      Email__Host: mailpit
+      Email__Port: 1025
+      Email__Security: None
+      Email__FromAddress: noreply@familyhub.local
+      Email__FromName: FamilyHub
+      Email__ApplicationUrl: http://localhost:8080
+      Jwt__Issuer: FamilyHub
+      Jwt__Audience: FamilyHub
+      Jwt__SigningKey: mX3q9A1pR7sL0fW8Vz2CkT5yHn9Jb4GeQ6rP8sY1uD3mF6tK0vR2xP7wL9hB5cZ
+      Jwt__AccessTokenMinutes: 15
+      Jwt__RefreshTokenDays: 30
+      Seq__ServerUrl: http://seq
+
+  web:
+    build:
+      context: ../sources
+      dockerfile: Web.App/Dockerfile
+    container_name: familyhub-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "8080:80"     # App -> http://localhost:8080 (proxies /api to the api container)
+
 volumes:
   mysql-data:
   seq-data:

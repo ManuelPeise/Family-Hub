@@ -46,7 +46,7 @@ namespace Logic.Authentication
         {
             return Enum.GetValues<ScopePermissionEnum>()
                        .Where(permission => permission != ScopePermissionEnum.None && permissions.HasFlag(permission))
-                       .Select(permission => $"{scopeType}:{permission}");
+                       .Select(permission => $"{scopeType.ToString().ToLower()}.{permission.ToString().ToLower()}");
         }
 
         public static SymmetricSecurityKey CreateSigningKey(JwtOptions jwtOptions)
