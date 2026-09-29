@@ -1,18 +1,18 @@
 @echo off
-rem Removes the containers. Optionally also deletes the data volumes (database and logs).
+rem Removes the containers and the locally built API and web app images. Optionally also deletes the data volumes (database and logs).
 cd /d "%~dp0"
 
 choice /C YN /N /M "Also delete all data (MySQL database, Seq logs)? [Y/N] "
 if errorlevel 2 goto :keepdata
 
-docker compose down -v
+docker compose down -v --rmi local
 if errorlevel 1 goto :error
 echo.
 echo Containers and data removed.
 goto :end
 
 :keepdata
-docker compose down
+docker compose down --rmi local
 if errorlevel 1 goto :error
 echo.
 echo Containers removed, data kept.

@@ -6,6 +6,8 @@ import commonDe from "src/lib/localization/resources/de/common.de.json";
 import commonEn from "src/lib/localization/resources/en/common.en.json";
 import notificationDe from "src/lib/localization/resources/de/notification.de.json";
 import notificationEn from "src/lib/localization/resources/en/notification.en.json";
+import navigationDe from "src/lib/localization/resources/de/navigation.de.json";
+import navigationEn from "src/lib/localization/resources/en/navigation.en.json";
 
 export const defaultNS = "common";
 
@@ -13,10 +15,12 @@ export const resources = {
   de: {
     common: commonDe,
     notification: notificationDe,
+    navigation: navigationDe,
   },
   en: {
     common: commonEn,
     notification: notificationEn,
+    navigation: navigationEn,
   },
 } as const;
 

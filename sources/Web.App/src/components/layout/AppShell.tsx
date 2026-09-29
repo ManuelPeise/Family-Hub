@@ -1,21 +1,16 @@
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
-import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
-import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
 import MuiTypography from "@mui/material/Typography";
 import React from "react";
 import { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
 import { MenuIcon } from "src/lib/utils/icons";
 import type { NavItem } from "src/components/layout/types/NavItem";
 import NotificationContainer from "src/components/layout/appbar/AppbarNotifications";
 import UserAppBarMenu from "src/components/layout/appbar/UserAppBarMenu";
+import SideMenu from "src/components/layout/sidemenu/SideMenu";
 
 interface IProps {
   appName: string;
@@ -27,14 +22,7 @@ interface IProps {
 }
 
 /** Frame for all pages after login: app bar on top, navigation in a drawer behind the menu button. */
-const AppShell: React.FC<IProps> = ({
-  appName,
-  navItems,
-  menuLabel,
-  navigationLabel,
-  children,
-}) => {
-  const { pathname } = useLocation();
+const AppShell: React.FC<IProps> = ({ appName, menuLabel, children }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
@@ -76,37 +64,12 @@ const AppShell: React.FC<IProps> = ({
         </Toolbar>
       </AppBar>
 
-      <Drawer
-        id="main-navigation"
-        anchor="left"
+      <SideMenu
         open={drawerOpen}
-        onClose={() => {
-          setDrawerOpen(false);
+        handleToggleOpen={(open: boolean) => {
+          setDrawerOpen(open);
         }}
-        slotProps={{ paper: { sx: { width: "85vw", maxWidth: 280 } } }}
-      >
-        <Toolbar>
-          <MuiTypography variant="h6" component="span">
-            {appName}
-          </MuiTypography>
-        </Toolbar>
-        <List component="nav" aria-label={navigationLabel} sx={{ px: 1 }}>
-          {navItems.map((item) => (
-            <ListItemButton
-              key={item.to}
-              component={NavLink}
-              to={item.to}
-              selected={pathname === item.to}
-              onClick={() => {
-                setDrawerOpen(false);
-              }}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} />
-            </ListItemButton>
-          ))}
-        </List>
-      </Drawer>
+      />
 
       <Box
         component="main"

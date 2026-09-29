@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Database.Migrations
 {
     [DbContext(typeof(FamilyHubDbContext))]
-    [Migration("20260928175334_InitializeDatabase")]
+    [Migration("20260929135140_InitializeDatabase")]
     partial class InitializeDatabase
     {
         /// <inheritdoc />
@@ -208,6 +208,22 @@ namespace Data.Database.Migrations
                             CreatedBy = "System",
                             Name = "Administration",
                             ScopeType = 1
+                        },
+                        new
+                        {
+                            Id = 2L,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedBy = "System",
+                            Name = "Administration.FamilyAdministration",
+                            ScopeType = 2
+                        },
+                        new
+                        {
+                            Id = 3L,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedBy = "System",
+                            Name = "Administration.UserAdministration",
+                            ScopeType = 3
                         });
                 });
 

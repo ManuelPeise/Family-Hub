@@ -13,7 +13,9 @@ namespace Data.Database.Context.Seeds
 
             var entities = new List<ScopeEntity>
             {
-                new ScopeEntity { Id = 1, Name = "Administration", ScopeType = ScopeTypeEnum.Administration, CreatedAt = timeStamp, CreatedBy = "System" },
+                new ScopeEntity { Id = (long)ScopeTypeEnum.Administration, Name = "Administration", ScopeType = ScopeTypeEnum.Administration, CreatedAt = timeStamp, CreatedBy = "System" },
+                new ScopeEntity { Id = (long)ScopeTypeEnum.FamilyAdministration, Name = "Administration.FamilyAdministration", ScopeType = ScopeTypeEnum.FamilyAdministration, CreatedAt = timeStamp, CreatedBy = "System" },
+                new ScopeEntity { Id = (long)ScopeTypeEnum.UserAdministration, Name = "Administration.UserAdministration", ScopeType = ScopeTypeEnum.UserAdministration, CreatedAt = timeStamp, CreatedBy = "System" },
             };
 
             builder.HasData(entities);

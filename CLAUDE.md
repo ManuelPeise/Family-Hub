@@ -34,20 +34,23 @@ dotnet ef migrations add <Name> --context PersistedGrantDbContext              -
 
 ### Local infrastructure (Docker)
 
-Docker files are in `docker/`. Start them before running the API:
+Docker files are in `docker/`. The compose file runs the infrastructure plus the full app: `api` (built from `sources/Web.Api/Dockerfile`) and `web` (`sources/Web.App/Dockerfile`, nginx serving the Vite build and proxying `/api` to `api`, so the auth cookies stay same-origin). Both images use `sources/` as build context (`sources/.dockerignore`).
 
-- `docker/start.bat`: starts the containers with `docker compose up -d`.
-- `docker/update.bat`: pulls new images and recreates the containers. Data is kept.
-- `docker/delete.bat`: runs `down`, and asks whether to also remove the volumes.
-- Without the batch files, use `docker compose -f docker/docker-compose.yml up -d` from the repo root.
+- `docker/start.bat`: builds changed images and starts all containers with `docker compose up -d --build`.
+- `docker/update.bat`: pulls new images, rebuilds the app images on fresh base images, and recreates the containers. Data is kept.
+- `docker/delete.bat`: runs `down --rmi local`, and asks whether to also remove the volumes.
+- Without the batch files, use `docker compose -f docker/docker-compose.yml up -d --build` from the repo root.
+- To debug the API locally instead, stop the app containers (`docker compose stop api web`) and run `dotnet run` as usual. They use different ports, so running both at once also works.
 
 | Service | Address | Matches config key |
 |---|---|---|
+| Web app (container) | http://localhost:8080 | `Email:ApplicationUrl` in compose |
+| API (container) | http://localhost:5080/swagger | — |
 | MySQL 8.4 | `localhost:3306`, DB `FamilyHubContextDb` (created by `MYSQL_DATABASE` on first start), user `DevUser` / `DevPassword123!` | `ConnectionStrings:FamilyHubContext` |
 | Mailpit | SMTP `localhost:1025`, UI http://localhost:8025 | `Email` |
 | Seq | UI + ingestion http://localhost:5341 | `Seq:ServerUrl` |
 
-The compose values mirror `Web.Api/appsettings.Development.json`. If you change one, change the other too.
+The compose values mirror `Web.Api/appsettings.development.json`. If you change one, change the other too. The `api` container gets its whole config from environment variables in the compose file, with container host names (`mysql`, `mailpit`, `seq`), because Linux does not load the lowercase `appsettings.development.json`.
 
 ## Architecture
 

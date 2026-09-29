@@ -37,5 +37,6 @@
   "labelSave": "Speichern",
   "labelUsername": "Benutzername",
   "labelUserNameOrEmail": "Benutzername oder E-Mail",
-  "navHome": "Startseite"
+  "navHome": "Startseite",
+  "labelAppDescription": "Beschreibung der App"
 }
